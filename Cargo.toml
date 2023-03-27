@@ -1,0 +1,2 @@
+[workspace]
+members = ['module-one','module-two','module-three','module-four','module-five','module-six']
