@@ -3,8 +3,8 @@ name = "module_one"
 version = "0.1.0"
 edition = "2021"
 
-[workspace]
-members = ["hello_rust","hello_cargo"]
+# [workspace]
+# members = ["hello_rust","hello_cargo"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
