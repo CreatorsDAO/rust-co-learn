@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":[["compound","复合类型"],["scalar","标量类型"]]};

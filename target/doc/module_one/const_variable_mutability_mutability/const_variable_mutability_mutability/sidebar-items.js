@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":[["const_variable_mutability_mutability",""]]};

@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":[["string","2.3.1 字符串"]]};
