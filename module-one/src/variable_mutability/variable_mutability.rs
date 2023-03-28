@@ -36,6 +36,6 @@
 ```
 */
 
-pub fn const_variable_mutability_mutability() {
+pub fn variable_mutability() {
     println!("");
 }
