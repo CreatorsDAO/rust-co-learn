@@ -1,36 +1,37 @@
+/// 1. 文档注释,一般写在当前文件的最顶端
+
 fn main() {
-    // 1 &str
-    // 字符串字面量实际上存放在程序的只读数据段中，在程序运行时会被加载到内存中读取
-    let s = "Hello Rust";
-    let mut s1 = "Hello Go";
+    // 1 match
+    // match 是最长用的模式匹配，主要和枚举搭配使用，以匹配不同的枚举成员
 
-    s1 = "Hello Rust";
-    println!("{}", s1);
+    match std::fs::File::open("rust.txtr") {
+        Ok(file) => println!("{:?}", file),
+        Err(err) => panic!("{}", err),
+    }
 
-    // 2 String
-    // String 通过指针指向存放在堆上的字符串
+    // 2 if let
+    // if let 可以让我们只关注我们想要的结果
 
-    let s2 = String::from("Hello Rust");
+    if let Ok(file) = std::fs::File::open("rust.txtr") {
+        println!("{:?}", file);
+    }
 
-    // String 有三个word：ptr、len、cap,可以直接通过方法访问
+    // 3 while let
+    // 和 if let 类似，只处理正确的结果
 
-    let cap = s2.capacity();
-    let len = s2.len();
-    let ptr = s2.as_ptr();
+    while let Ok(file) = std::fs::File::open("rust.txt") {
+        println!("{:?}", file);
+    }
 
-    println!("len {}", len);
-    println!("cap {}", cap);
-    println!("pointer {:?}", ptr);
+    // 4 let
+    // let 本身也是一种模式匹配
+    // 使用 let 匹配元组中的元素
 
-    // 3 字符串切片
-    // 字符串本质上一个u8序列，支持切片操作
+    let tuple = (42, true, "rust");
 
-    let s1 = String::from("Hello Rust");
-    let s2 = "Hello Rust";
+    let (x, y, z) = tuple;
 
-    let slice1 = &s1[0..5];
-    let slice2 = &s2[6..10];
-
-    println!("slice1: {}", slice1); // Hello
-    println!("slice2: {}", slice2); // Rust
+    println!("{:?}", x);
+    println!("{:?}", y);
+    println!("{:?}", z);
 }

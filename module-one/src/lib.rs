@@ -6,4 +6,5 @@
 
 pub mod advance_data_types;
 pub mod basic_data_types;
+pub mod comment;
 pub mod const_variable_mutability_mutability;
