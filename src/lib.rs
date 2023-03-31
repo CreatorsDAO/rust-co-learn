@@ -4,8 +4,4 @@
     test(attr(allow(dead_code, deprecated, unused_variables, unused_mut)))
 )]
 
-pub mod borrow_lifetime;
-pub mod ownership;
-pub mod traits;
-// pub mod control;
-// pub mod variable_mutability;
+//! Rust 共学参考资料

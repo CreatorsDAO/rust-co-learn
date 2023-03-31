@@ -4,7 +4,7 @@
 
 但是为了照顾到部分同学觉得前期太简单，所以列出了扩展资料
 
-# 模块一：了解Rust
+# 模块一：初识Rust
 
 ## 1 .1 安装Rust
 
@@ -298,7 +298,7 @@ Rust中的引用类型是一等公民，从可变性上可以分为可变引用�
 
 #### 1.3.3.3 集合
 
-两个重要的集合Vec和HashMap
+两个重要的集合Vec和HashMap，这里的集合指的是它们都聚集了多个同类型的元素
 
 ```
  // 1 Vec
@@ -710,23 +710,543 @@ fn main() {
 
 # 模块二：Rust核心知识
 
-## 1 所有权机制
+Rust是无GC（garbage collection）的语言，对于堆内存的管理主要通过栈来实现。具体而言就是通过借用检查和所有权机制来实现。核心规则如下
 
-所有权与字符串
+**所有权规则：**
 
-所有权与动态类型
+1. 每个值都有一个所有者（owner）
+2. 每个值在任一时刻只有一个所有者
+3. 当所有者（变量）离开作用域时，它所拥有的值将被丢弃
 
-所有权共享
+**Rust 的借用规则：**
 
-## 2 借用和生命周期
+1. 同一个作用域中，一个资源只有一个可变**借用**（&mut T），但拥有可变**借用**（&mut T）后就不能有不可变**借用**（&T）
 
-## 3 trait与泛型
+2. 同一个作用域中，一个资源可以有多个不可变**借用**（&T），但拥有不可变**借用**（&T）后就不能有可变**借用**（&mut T）
+3. **借用**在离开作用域后释放。
 
-标准库中的主要trait
+## 2.1 所有权机制
 
-泛型、自定义数据结构和trait
+### 2.1.1 固定尺寸类型
 
-## 4 项目练习
+固定尺寸类型是指那些在编译期就可以确定大小的类型。Rust中主要的固定尺寸类型如下：
+
+| 类型     | 描述                             |
+| -------- | -------------------------------- |
+| 基本类型 | 整数、浮点数、布尔值和字符类型等 |
+| 复合类型 | 数组、元组等                     |
+| 指针类型 | 引用和裸指针、函数指针等         |
+| ...      | ...                              |
+
+```
+// 1 所有权与基本类型
+
+    // 下面的每个值都只有一个所有者
+
+    let owner1 = 42;
+
+    let owner11 = owner1; // owner是一个新的所有者，它的值是 owner1值的复制品，owner1仍然是一个有效的所有者
+    println!("{}", owner1); // 42,可以通过 owner1 使用值
+
+    // 现在有两个值和对应的两个有效的所有者，owner1 和 owner11
+
+    println!("owner1 addr {}", owner1);
+    println!("owner11 addr {}", owner11);
+
+    // 可以看到值的地址也是不相同（佐证owner11和owner1各拥有一个值）
+    // 对于值42来说，它只有一个所有者，因此现在有两个42的值，并且它们的地址是不同的
+
+    println!("owner1 addr {:p}", &owner1); // 0x7ff7b404dd90
+    println!("owner11 addr {:p}", &owner11); // 0x7ff7b404dd94
+
+    let owner2 = 42.0;
+    let owner3 = true;
+
+    {
+        let owner4 = '4'; // ‘4’ 这个值的所有者 `owner4` 在离开作用域时，值会被丢弃
+    }
+
+    // println!("{}", owner4) // 无法再使用 owner4,因为它已经被丢弃
+
+    // 2 所有权与复合类型
+
+    let arr_owner: [i32; 3] = [1, 2, 3];
+    let tuple_owner = (32, true, 42.0);
+
+    // 3 所有权与指针类型
+
+    // 这里所说的指针是指指向某个内存地址的变量类型，包括引用、裸指针以及函数指针
+
+    // 3.1 字符串的引用
+
+    let ptr_owner = "rust";
+    let num = 42;
+
+    // 注意: ptr_owner 是字符串引用的所有者，而不是字符串的所有者，这里的`值`就是引用本身
+
+    let ptr_copy = ptr_owner; // 此处所有者 ptr_copy 的值是 ptr_owner 的值的复制品，ptr_owner 仍然是一个有效的所有者
+
+    // 由于 ptr_owner 和 ptr_copy 的值都是指向相同值的引用，所以它们指向的内存地址是相同的
+    println!("{:p}", ptr_owner); // 0x10ac12004
+    println!("{:p}", ptr_copy); // 0x10ac12004
+
+    // 3.2 基本类型的裸指针
+    // 在rust中使用 `as *const T` 可以将引用转为裸指针
+
+    let ptr_owner2 = &num as *const i32;
+
+    // 3.3 函数指针
+
+    fn func() -> i32 {
+        0
+    }
+    let func_ptr = func;
+```
+
+### 2.1.2 动态尺寸类型
+
+Rust是一门静态类型语言，这意味着所有变量在编译期必须是大小确定的，但是在实际场景中，比如字符串和切片类型的大小取决于运行时的具体情况。Rust对这类数据的处理方法是使用它们的指针（引用），而不是数据本身，众所周知，一个类型不管多大，对应的指针（引用）大小是确定的
+
+| 类型         | 描述                                                         |
+| ------------ | ------------------------------------------------------------ |
+| 字符串类型   | str, 本质上是一个u8类型的数据序列，实际中经常使用的形式：&str 和 String |
+| 切片类型     | [T], 它代表类型为 `T` 的元素组成的数据序列：实际中经常使用的形式： Vec<T> |
+| trait object | trait object 的大小只有在运行时才能确定（可以先不用了解，关于trait的内容后面会继续讲解） |
+| ...          | ...                                                          |
+
+```
+// 1 所有权与字符串
+    // 我们在前面介绍过，字符串可以存放在程序的只读数据段中或者堆上
+    // 一般情况下，字符串字面量存放在只读数据段中的，声明之后很少去修改它
+    // 而需要动态变化的字符串我们会把它存放到堆上，并且通过栈内存来管理堆内存
+
+    let ptr_owner = "Rust"; // 存放在只读数据段中
+    let heap_ptr_owner = String::from("Rust"); //存放在堆上
+
+    // 1.1 对于存放在只读数据段中的字符串字面量，它的所有权规则和其他基本类型一样,这里不再赘述
+
+    let ptr_copy = ptr_owner;
+
+    // 由于 ptr_owner 和 ptr_copy 的值都是指向相同值的引用，所以它们指向的内存地址是相同的
+    println!("{:p}", ptr_owner); // 0x10ac12004
+    println!("{:p}", ptr_copy); // 0x10ac12004
+
+    // 1.2 对于存放在堆上的字符串，如果把它的所有者赋值给另一个变量，意味着把堆上所有权就会转移给新的所有者
+    let heap_ptr_old = String::from("Rust"); //存放在堆上
+
+    let heap_ptr_new = heap_ptr_old;
+
+    // println!("old owner{:?}", heap_ptr_old); // 无法再通过 heap_ptr_old 使用值，因为它已经把数据所有权移交给了新的所有者 heap_ptr_new
+    println!("old owner{:?}", heap_ptr_new); // heap_ptr_new 可以正常访问到堆上的数据，并且它是唯一的所有者，当它离开作用域时，堆上的数据也会被丢弃
+
+    {
+        let owner_old = String::from("rust");
+        let owner_new = owner_old;
+
+        // 在此处离开作用域
+    }
+
+    // println!("{:?}", owner_new); 无法再通过 owner_new 使用值，因为它已经被丢弃
+
+    // 2 所有权与slice
+
+    // 上面的字符串str 实际上是一个特殊的 slice, 它仅代表有效的utf-8序列
+    // 而切片中可以包含任何类型的元素，如其他基础类型、自定义类型等, 正如不直接使用 str一样，我们也不直接使用[T],而是使用它的指针（引用）类型，Vec<T>
+    // slice中的数据也存放在堆上，Rust中slice内存管理逻辑同存放在堆上的str
+
+    // vec 有两种创建方式：使用宏或者方法
+    let str_slice = vec!["rust", "go", "cpp"];
+    let u32_slice: Vec<u32> = Vec::new();
+
+    let new_owner1 = str_slice;
+    let new_owner2 = u32_slice;
+
+    // println!("{:?}", str_slice); // 无法再通过 str_slice 使用值，因为它已经被丢弃
+    // println!("{:?}", u32_slice); // 无法再通过 u32_slice 使用值，因为它已经被丢弃
+
+    println!("{:?}", new_owner1); // 可以通过新的所有者访问到原来的值
+    println!("{:?}", new_owner2); // 可以通过新的所有者访问到原来的值
+
+    // 3 总结
+    // 当数据存放在堆上时，把所有权赋值给另一个变量，意味着把堆上所有权就会转移给新的所有者，堆上的数据本身没有被复制，原来的所有者不再拥有数据
+    // 当数据存放在栈上时，把所有权赋值给另一个变量，意味着把栈上的数据复制了一份给新的所有者，原来的所有者仍然拥有原来的数据
+```
+
+### 2.1.3 所有权共享
+
+所有权规则更像是对资源的独占，在实际场景中，你可能希望多个角色共享访问某个动态资源。Rust提供了两个容器类型Rc<T>和Arc<T>，可以让你同时让多个变量拥有动态数据的所有权
+
+```
+ // 1 独占访问资源
+
+    let mut dynamic_source = String::from("content");
+
+    let role1 = dynamic_source;
+    // let role2 = dynamic_source; // 资源被 role1 所有，此时role1独占访问
+    let role2 = role1; // 只有role1 把所有权移交给 role2， role2 才可以访问
+
+    // 这样做的好处是，可以避免资源被多个变量同时访问，导致资源被修改
+    // 坏处是，资源只能被一个变量访问，低效
+
+    use std::rc::Rc;
+    use std::sync::Arc;
+
+    // 2 所有权与共享容器 Rc<T>,它适用于单线程
+
+    // 使用共享容器包裹动态资源
+
+    let dynamic_source = vec![1, 2];
+
+    let container = Rc::new(dynamic_source);
+
+    let role1 = container.clone(); // 这里clone方法其实是复制了对资源访问的所有权，而不是资源本身
+    let role2 = container.clone();
+
+    // 通过共享容器访问资源,此时资共享资源有三个所有者，可以同时访问
+    println!("{:?}", container); // [1,2]
+    println!("{:?}", role1); // [1,2]
+    println!("{:?}", role2); // [1,2]
+
+    // 3 所有权共享容器 Arc<T>，它适用于多线程
+
+    let dynamic_source = String::from("rust");
+
+    let container = Arc::new(dynamic_source);
+
+    let role1 = container.clone(); // 这里clone方法其实是复制了对资源访问的所有权，而不是资源本身
+    let role2 = container.clone();
+
+    // 通过共享容器访问资源,此时资共享资源有三个所有者，可以同时访问
+    println!("{:?}", container); // rust
+    println!("{:?}", role1); // rust
+    println!("{:?}", role2); // rust
+
+    // 4 共享容器与内存管理
+    // 注意：Rc<T>和Arc<T>实际上是一种引用计数，每使用clone方法一次，引用计数就会+1，当变量离开作用域时，引用计数会-1，当引用计数为0时，堆内存会被释放
+    // 整个过程在编译器看来，每个变量都拥有一个Rc或者Arc。所以并不违反所有权规则
+    // 这里提一点:一般情况下，Rust使用栈来管理堆内存。但是Rc和Arc是一种特别的机制，它允许不受栈内存控制的堆内存，也就是允许内存泄露。对于这种泄漏通过引用计数来管理
+
+    // 4.1 通过栈内存来管理堆内存
+
+    {
+        let source = String::from("hello");
+
+        let role1 = source;
+        println!("{:?}", role1);
+        // 丢弃
+
+        // println!("{:?}", source); // 不能再使用source，因为source已经移交了所有权
+        // 当role1离开作用域时，会立即丢弃 role1和堆上的数据
+    }
+
+    // 4.2 通过引用计数来管理堆内存
+
+    {
+        let source = String::from("hello");
+
+        // 使用Rc包裹资源，让内存泄漏
+        let container = Rc::new(source); // 引用计数 + 1
+                                         //
+        let role1 = container.clone(); // 引用计数 + 1
+        let role2 = container.clone(); // 引用计数 + 1
+
+        // 当变量离开作用域时，role2，role1，container相继离开作用域时，引用计数都会-1，当引用计数为0时，堆上的数据才会被释放
+    }
+```
+
+## 2.2 借用和生命周期
+
+根据是否拥有数据的所有权，Rust中的变量可以分为拥有所有权的变量和没有所有权的变量
+
+而拥有所有权的变量我们只需要搞明白所有权规则就行了，所以有所有权的变量生命周期并没有难点
+
+但对与没有所有权的变量也就是引用（借用），比较麻烦，但也主要是在参数传递的过程中
+
+```
+ // 1 有所有权的变量和没有所有权的变量
+
+    // 有所有权
+
+    let have_ownership = String::from("rust");
+
+    // 没有所有权
+    let have_no_ownership = "rust"; // 字符串切片的引用
+
+    // 有所有权
+    let num = 42;
+
+    // 没有所有权
+    let num_ptr = &num;
+
+    // 2 变量的生命周期 （不管是有所有权的变量还是没所有权的变量）: 从声明开始，到离开作用域结束
+
+    {
+        let x = 32;
+        println!("{}", x);
+
+        {
+            // 引用的生命周期
+            let x_ptr = &x;
+
+            // x_ptr 在离开作用域时，生命周期结束，值会被丢弃
+        }
+
+        // println!("{}", x_ptr); // 无法再使用 x_ptr,因为它已经被丢弃
+
+        // x 在离开作用域时，生命周期结束，值会被丢弃
+    }
+
+    // println!("{}", x); // 无法再使用 x,因为它已经被丢弃
+
+    // 3 使用泛型生命周期参数显式标注参数生命周期
+
+    // 声明一个函数，参数是引用类型，返回值也是引用类型
+    // 它无法编译通过，因为编译器无法推断出参数和返回值的生命周期
+    // 事实上，i32这种非常轻量的类型，我们直接传值就可以了，不需要传引用
+
+    // fn foo(x: &i32, &y: &i32) -> &i32 {
+    //     println!("{}", x);
+    // }
+
+    // 如果是比较大的类型，比如结构体，我们就需要传引用了
+
+    struct Foo {
+        x: i32,
+        y: (i32, bool),
+        z: String,
+    }
+
+    let f1 = Foo {
+        x: 32,
+        y: (32, true),
+        z: String::from("rust"),
+    };
+    let f2 = Foo {
+        x: 32,
+        y: (32, true),
+        z: String::from("rust"),
+    };
+
+    // 仍然无法编译通过，因为编译器无法推断出参数和返回值的生命周期
+    // 这是因为Rust对于函数的检查只会检查签名，而不是函数里面的具体逻辑
+
+    // fn bar(x: &Foo, y: &Foo) -> &Foo {
+    //     x
+    // }
+
+    // 但是Rust到底在担心什么情况呢，我们来看看下面的代码
+
+    {
+        // 假设下面的函数可以编译通过
+
+        // fn bar(x: &Foo, y: &Foo) -> &Foo {
+        //     let f3 = &Foo {
+        //         x: 32,
+        //         y: (32, true),
+        //         z: String::from("rust"),
+        //     };
+
+        //     f3
+        // }
+
+        // 定义两个生命周期不同的变量
+
+        let mut f1 = &Foo {
+            x: 32,
+            y: (32, true),
+            z: String::from("rust"),
+        };
+
+        {
+            let f2 = &Foo {
+                x: 32,
+                y: (32, true),
+                z: String::from("rust"),
+            };
+
+            // 调用函数，传入两个引用
+            // 前面假设函数可以通过，会返回函数内部变量的引用
+
+            // let f4 = bar(f1, f2);
+            // 将返回结果赋值给f4,显然是不合理的，因f3在函数结束时会被丢弃，f4就会指向一个无效的内存地址
+        }
+
+        // 现在使用生命周期参数，来标注参数和返回值的生命周期
+        // 注意Rust中的生命周期参数是以单引号开头的小写字母，也是一种泛型，但通常使用 'a，‘b，‘c这样的字母
+        // 生命周期参数也像泛型一样需要先声明才能使用
+        // 使用了生命周期参数后，编译器通过了，注意这里我们只是告诉编译器返回值的生命周期是y的生命周期，其他的什么都没做
+        // 这实际上就告诉编译器我们没有返回局部变量，所以不会有悬垂指针的问题
+
+        fn bar<'a, 'b>(x: &'a Foo, y: &'b Foo) -> &'b Foo {
+            y
+        }
+
+        // 如果不确定返回哪个参数的引用，可以使用下面的写法,`'b: 'a` 表示'b 的生命周期要不短于'a的生命周期
+
+        fn far<'a, 'b: 'a>(x: &'a Foo, y: &'b Foo) -> &'a Foo {
+            if x.x > y.x {
+                x
+            } else {
+                y
+            }
+        }
+
+        {
+            let f3 = &Foo {
+                x: 32,
+                y: (32, true),
+                z: String::from("rust"),
+            };
+
+            let f3 = bar(f1, f3);
+
+            f1 = f3;
+
+            println!("{}", f1.x);
+
+            // 调用far
+            // 我们在声明函数的时候，要求‘b不短于’a,但是f3的生命周期比f1的生命周期短，但依然会成功执行，这是为什么？
+            let f4 = far(f1, f3);
+            let f5 = far(f3, f1);
+
+            // 借用检查器
+            // 实际上，当我们标注了生命周期以后，Rust编译器会进行计算，而不是简单的检查签名中参数生命周期和参数声明时的生命周期是否一致
+            // 生命周期计算过程：Rust先会取所有参数的周期，记录代码最后的覆盖位置，假设记为x，然后对两个参数的生命周期求交集，记录最早结束位置，假设记为y
+            // x < = y,编译器通过检查，x > y 编译器会报错
+        }
+    }
+```
+
+## 2.3 trait
+
+### 2.3.1 trait 概况简介
+
+Rust 中的 trait 是一种定义行为的方式，它类似于其他语言中的接口或抽象类。一个 trait 定义了一组方法的签名，这些方法可以在其他类型中实现，并允许这些类型表现出特定的行为
+
+Rust中的trait一方面约定类型的共同行为，但另一方面也经常以是否实现了某个trait作为对类型的约束
+
+Rust中的trait非常强大，它几乎和所有类型相关，你可以通过标准库中的大量定义好的trait来学习类型有哪些方法（可以执行哪些行为），同时，也可以自定义triat，粘合不同的类型，构建自己的项目
+
+```
+ // 1 trait类型
+
+    // 1.1 空trait
+
+    trait A {}
+
+    // 1.2 有方法的trait
+
+    trait B {
+        fn method1(&self);
+        fn method2(&self);
+
+        // ...
+    }
+
+    // 1.3 有关联类型的trait
+
+    trait C {
+        type Type;
+
+        fn method1(&self) -> Self::Type;
+    }
+
+    // 1.4 有默认实现的trait
+
+    trait D {
+        // 这个方法是默认实现
+        fn method1(&self) {
+            println!("method1");
+        }
+        fn method2(&self);
+    }
+
+    // 2 如何实现 trait
+
+    // 2.1 手动实现
+
+    struct Book;
+
+    trait Read {
+        fn read(&self);
+    }
+
+    // 使用impl语法
+    impl Read for Book {
+        fn read(&self) {
+            println!("read book");
+        }
+    }
+
+    // 注意和为类型实现方法做区别
+
+    impl Book {
+        fn read(&self) {
+            println!("read book");
+        }
+    }
+
+    // 2.2 使用宏实现
+    // 标准库和第三方库中一些trait可以通过派生宏来实现
+
+    #[derive(Default, Clone)]
+    struct Student {
+        name: String,
+        age: u32,
+    }
+
+    // 可以直接调用trait提供的方法
+    let s = Student::default();
+    let s1 = s.clone();
+
+    // 3 trait约束
+
+    // 3.1 trait继承，如下要求类型必须先实现 Clone和Default trait才能是实现 S trait
+    trait S: Clone + Default {
+        fn get_age(&self) -> u32;
+    }
+
+    impl S for Student {
+        fn get_age(&self) -> u32 {
+            self.age
+        }
+    }
+
+    // trait 作为函数参数的约束：只有实现了S trait的泛型才能作为下列函数的参数
+
+    fn person_age<T: S>(s: T) -> u32 {
+        s.get_age()
+    }
+
+    struct Teacher {
+        name: String,
+        age: u32,
+    }
+
+    let t = Teacher {
+        name: "teacher".to_string(),
+        age: 30,
+    };
+
+    // person_age(t); // t没有实现S trait，所以不能作为参数
+    person_age(s); // 可以调用
+```
+
+标准库中预导入了很多trait，可以直接在文件中使用而不用` use`导入，你可以大概看一下下列表格，消除对 trait的陌生感
+
+![image-20230302004216125](/Users/qinjianquan/Career/rust/image/4.3.png)
+
+如下是不同场景下经常使用的trait
+
+![img](https://pic2.zhimg.com/80/v2-3d9eb5c90181e8e59e1bb0d062107a39_1440w.webp)
+
+### 2.3.2 Trait与基础类型
+
+### 2.3.2 Trait与进阶类型
+
+### 2.3.3 Trait 对象
+
+## 2.4 项目练习
 
 # 模块三：Rust进阶知识
 
