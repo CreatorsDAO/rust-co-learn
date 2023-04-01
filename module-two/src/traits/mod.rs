@@ -1,7 +1,7 @@
 //! 2.3 trait
 //!
 
-pub mod trait_advanced_type;
-pub mod trait_basic_type;
 pub mod trait_intro;
-pub mod trait_onject;
+pub mod trait_object;
+pub mod trait_ownership;
+pub mod trait_type_convert;

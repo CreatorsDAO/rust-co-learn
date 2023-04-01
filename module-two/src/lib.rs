@@ -7,5 +7,4 @@
 pub mod borrow_lifetime;
 pub mod ownership;
 pub mod traits;
-// pub mod control;
-// pub mod variable_mutability;
+
