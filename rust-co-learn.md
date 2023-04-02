@@ -1775,35 +1775,315 @@ Rust提供了迭代器trait,从而实现遍历，for循环本质上是一个语�
     }
 ```
 
+Rust中有多个智能指针，可以参考下表，这里总结了一个表，方便你阅读
+
+![image-20230203001747611](/Users/qinjianquan/Library/Application Support/typora-user-images/image-20230203001747611.png)
+
 ## 3.2 类型进阶
 
-### 3.2.1 Box<T>
+Rust中对于提供了很多类型，用于处理一些特殊的场景
 
+### 3.2.1 Box <T>
 
+Box可以将内存强制分配到堆上，并且它也是智能指针，可以自动解引用和管理堆内存。所以在使用的时候只需要使用它将数据分配到堆上，并不需要再考虑如何释放内存
 
-### 3.2.3 可变容器
+```
+ // 1 Box<T> 与数据分配
+
+    // 在Rust中，你可以使用Box将数据强行存储到堆上
+
+    let a = Box::new("rust");
+    let b = Box::new(42);
+
+    // 它也是唯一可以将数据放到堆上的途径
+
+    // 2 Box<T> 是一个智能指针
+    // 它实现了Deref和Drop trait
+
+    let s = Box::new("rust");
+    let s = *s; // 解引用
+
+    // 离开作用域时，会自动调用drop方法，释放堆上的数据
+
+    // 这个类型比较简单，再次需要强调的是它是众多的Rust基于结构体构和trait造的特殊类型之一
+
+```
+
+### 3.2.2 可变容器
+
+在编译期，我们需要使用mut显式声明变量的可变性。在运行时，Rust提供了可变容器Cell和RefCell允许修改不可变变量（这个过程实际上是通过原生指针来完成的
+
+```
+ // 1.编译期：通过 mut 显式声明变量的可变性，也叫外部可变性
+    use std::cell::Cell;
+    let can_not_change = "rust";
+    let mut can_change = "go";
+    // can_not_change = "cpp"; // 不可重新赋值
+    can_change = "c"; // 可以更改
+
+    // 2. 运行期：通过Cell和RefCell实现可变性，也叫内部可变性
+    // 2.1 Cell<T> 的修改和读取
+    struct Foo {
+        x: u32,
+        y: Cell<u32>,
+        z: Cell<Vec<String>>,
+    }
+
+    let foo = Foo {
+        x: 1,
+        y: Cell::new(3),
+        z: Cell::new(Vec::new()),
+    };
+
+    // 修改容器内的变量使用set方法
+    foo.y.set(100);
+    foo.z.set(vec!["rust".to_owned()]);
+
+    // 读取容器内的变量有两种：固定大小类型可以使用 get和into_inner; 动态大小类型只能使用into_inner
+    assert_eq!(100, foo.y.get());
+    assert_eq!(100, foo.y.into_inner());
+
+    // assert_eq!(vec!["rust".to_owned()], foo.z.get()); 不能使用get方法
+    assert_eq!(vec!["rust".to_owned()], foo.z.into_inner());
+
+    // 2.2 RefCell<T> 的修改和读取
+    // 通过borrow_mut实现可变性
+    // 主要是应用于一些动态大小类型，通过borrow获取值，有运行时开销
+
+    use std::cell::RefCell;
+    let vec = vec![1, 2, 3, 4];
+
+    let ref_vec = RefCell::new(vec);
+
+    println!("{:?}", ref_vec.borrow()); // 不可变借用 使用borrow
+    ref_vec.borrow_mut().push(5); // 可变借用改变，使用borrow_mut
+    println!("{:?}", ref_vec.borrow());
+```
+
+### 3.2.3 共享容器
+
+共享容器Rc<T>和Arc<T>之前在所有权共享中介绍过。通过共享容器我们可以使多个变量拥有所有权（本质上是通过引用计数实现的），从而对资源进行操作。具体示例细节你可以参考之前的代码
+
+### 3.2.4 特殊类型
+
+**`PhantomData<T>`** ，它通常用于在泛型代码中标记一些类型参数，但不实际使用它们，从而向 Rust 编译器传达有关代码中类型关系的信息。它被称为 “幽灵数据”，因为它不占用任何实际内存空间，只在编译时起作用
+
+一般它起两个作用：
+
+1 用于在类型签名中传递类型信息，但不实际使用
+
+2 作为一个类型参数的标记，用于告诉 Rust 编译器某些重要信息，例如，当需要实现 `Drop` trait 时，但是类型不实际包含任何需要释放的资源，可以使用 `PhantomData` 来占据一个虚拟的位置，这样以确保编译器不会优化掉的 `Drop` 实现
+
+```
+use std::marker::PhantomData;
+
+struct MyType<T> {
+    _marker: PhantomData<T>,
+}
+
+impl<T> MyType<T> {
+    fn new() -> MyType<T> {
+        MyType { _marker: PhantomData }
+    }
+}
+
+fn main() {
+    let a: MyType<u32> = MyType::new();
+    let b: MyType<String> = MyType::new();
+}
+```
+
+**`Pin<T>`**: 通常用于解决 Rust 引用类型的安全性问题，尤其是与异步编程和内存管理相关的问题。`Pin<T>` 类型可以确保被引用的值不会被移动或释放
+
+一般情况下：Rust会确保引用总是有效的，但是也有例外情况（没办法，又涉及到后面的内容了，这里你可以先大概有个了解就行）：
+
+1. 当异步代码在运行时可能会移动或释放被引用的值时，比如 Future 或 async 闭包
+2. 当使用 `unsafe` 代码时，可能会通过裸指针将引用类型转换为可变引用类型，从而破坏编译器对引用类型的保护
+
+```
+// 2 特殊类型：Pin<T>
+
+    use std::pin::Pin;
+
+    struct MType {
+        data: String,
+    }
+
+    impl MType {
+        fn new(data: String) -> MType {
+            MType { data }
+        }
+
+        fn get_data(self: Pin<&Self>) -> &str {
+            unsafe { &self.get_ref().data }
+        }
+    }
+
+    let my_type = MType::new("hello".to_string());
+    let pinned = Pin::new(&my_type);
+    let data = pinned.get_data();
+    println!("{}", data);
+```
 
 ## 3.4 项目练习
 
 # 模块四：Rust项目基础
 
-## 1 错误处理
+## 4.1 错误处理
 
-## 2 项目管理
+Rust整体的错误处理机制有一个层级，随着错误的`严重程度`可以选择不同的处理方案。
 
-### 2.1 crate
+1. 类型系统保证函数契约（Rust严格的类型系统已经帮我们消除了这部分的错误，如果类型不正确，是不会通过编译的）
+2. Option<T>消除空指针失败 (处理有值或者无值的情况)
+3. Result<T,E> 传播错误 （处理成功或者失败的情况，失败时可以抛出错误）
+4. 断言用于防御 
+5. Panic恐慌 
 
-### 2.2 工作空间
+```
+ // 1 类型系统保证函数契约
+    fn sum(a: i32, b: i32) -> i32 {
+        a + b
+    }
 
-## 3 测试
+    // sum(1u32, 2u32) 违反函数契约
 
-### 3.1 单元测试
+    // 2 使用Option处理有值或无值的情况
+    // 当某个值可能为无值时，应该使用Option<T>来包裹，以正确处理无值的情况
+    fn log(val: f64) -> Option<f64> {
+        match val.log2() {
+            x if x.is_normal() => Some(x), // 有值情况
+            _ => None,                     // 无值情况
+        }
+    }
 
-### 3.2 文档测试
+    // 当一个值为Option<T>时，经常使用map和and_then等方法来链式处理
 
-### 3.3 集成测试
+    fn double(val: f64) -> f64 {
+        val * 2.
+    }
 
-## 4 项目练习
+    fn square(val: f64) -> f64 {
+        val.powi(2 as i32)
+    }
+
+    fn inverse(val: f64) -> f64 {
+        val * -1.
+    }
+
+    fn sqrt(val: f64) -> Option<f64> {
+        match val.sqrt() {
+            x if x.is_normal() => Some(x),
+            _ => None,
+        }
+    }
+
+    let number = 20.;
+    let result = Option::from(number)
+        .map(inverse)
+        .map(double)
+        .map(inverse)
+        .and_then(log)
+        .map(square)
+        .and_then(sqrt);
+    match result {
+        Some(x) => println!("x was {:?}", x),
+        None => println!("this failed"),
+    }
+
+    // 3 Result 用于处理成功或失败的情况
+
+    use std::fs::File;
+    use std::io::prelude::*;
+    use std::io::Error;
+
+    fn read_file_contents(file_path: &str) -> Result<String, Error> {
+        let mut file = File::open(file_path)?;
+        let mut contents = String::new();
+        file.read_to_string(&mut contents)?;
+        Ok(contents)
+    }
+
+    let file_path = "example.txt";
+    match read_file_contents(file_path) {
+        Ok(contents) => println!("File contents: {}", contents), // 成功情况
+        Err(error) => println!("Error reading file: {}", error), // 失败情况，抛出错误
+    }
+
+    // 4 断言
+    // 当你确定某个值一定会出现某种情况时，可以使用断言来终止程序
+
+    fn extend_vec(v: &mut Vec<i32>, i: i32) {
+        assert!(v.len() == 5); // 断言
+        v.push(i)
+    }
+
+    let mut vec = vec![1, 2, 3];
+    extend_vec(&mut vec, 4);
+
+    assert_eq!(4, vec[3]); // 断言
+
+    // 5 恐慌
+    // 当你确定某个值一定不会出现某种情况时，可以使用恐慌来终止程序
+    //
+
+    fn factorial(n: u32) -> u32 {
+        if n == 0 {
+            1
+        } else {
+            n * factorial(n - 1)
+        }
+    }
+
+    let result = factorial(10);
+    println!("Result: {}", result);
+    if result > 1000000 {
+        panic!("Result too large!"); // 使用panic!恐慌
+    }
+
+    // 总结：使用Option和Result来处理值或者错误，使用恐慌和断言来终止程序
+```
+
+## 4.2 项目管理
+
+Rust工程管理非常友好，可以轻松管理复杂庞大的工程项目
+
+### 4.2.1 crate
+
+在Rust中，有两种类型的crate，也叫package（类似于其他语言的`包`）: binary application package 和 library package .前者主要应用程序入口，后者更多的是为前者提供各种各样的功能支持
+
+可以使用`Cargo`来创建
+
+```
+ cargo new c1 --lib // 创建lib package
+ cargo new c2 --bin // 创建binary package，默认创建binary package
+```
+
+两种crate的区别并不大，但binary application package 可以直接使用 cargo run 运行，而library package 需要配置才可以。你可参考下面链接了解如何配置
+
+[如何在lib crate中运行程序](https://zhuanlan.zhihu.com/p/614506900)
+
+### 4.2.2 工作空间
+
+工作空间用于组织多个crate，本文档的代码组织结构就是使用workspace组织了多个lib crate
+
+```
+[workspace]
+members = ['module-one','module-two','module-three','module-four','module-five','module-six']
+```
+
+你可参考下面链接了解如何为项目配置工作空间
+
+[如何配置workspace](https://zhuanlan.zhihu.com/p/614506900)
+
+## 4.3 测试
+
+Rust中测试使用
+
+### 4.3.1 单元测试
+
+### 4.3.3 集成测试
+
+## 4.4 项目练习
 
 # 模块五：异步编程和无畏并发
 

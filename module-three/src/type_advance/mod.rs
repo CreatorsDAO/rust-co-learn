@@ -3,3 +3,4 @@
 
 pub mod boxs;
 pub mod mut_container;
+pub mod special_type;

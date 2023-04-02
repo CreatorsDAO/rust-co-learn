@@ -1,9 +1,11 @@
-/// 1. 文档注释,一般写在当前文件的最顶端
-///
-///
+//! 3.2.4 特殊类型
+//!
 
-fn main() {
-    // 1 特殊类型：PhantomData<T>
+/**
+
+```
+
+// 1 特殊类型：PhantomData<T>
 
     use std::marker::PhantomData;
 
@@ -46,4 +48,9 @@ fn main() {
     let pinned = Pin::new(&my_type);
     let data = pinned.get_data();
     println!("{}", data);
+```
+*/
+
+pub fn mut_container() {
+    println!("");
 }
