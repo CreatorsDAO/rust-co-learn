@@ -77,7 +77,7 @@
     // 当你确定某个值一定会出现某种情况时，可以使用断言来终止程序
 
     fn extend_vec(v: &mut Vec<i32>, i: i32) {
-        assert!(v.len() == 5); // 断言
+        assert!(v.len() == 3); // 断言
         v.push(i)
     }
 
@@ -100,7 +100,7 @@
 
     let result = factorial(10);
     println!("Result: {}", result);
-    if result > 1000000 {
+    if result < 10 {
         panic!("Result too large!"); // 使用panic!恐慌
     }
 

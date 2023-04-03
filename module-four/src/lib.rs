@@ -7,3 +7,11 @@
 pub mod error_handle;
 pub mod project_management;
 pub mod project_tests;
+
+pub use my_add::*;
+mod my_add {
+
+    pub fn add() -> i32 {
+        2 + 2
+    }
+}
