@@ -2077,11 +2077,164 @@ members = ['module-one','module-two','module-three','module-four','module-five',
 
 ## 4.3 测试
 
-Rust中测试使用
+测试对于任何语言来说都非常重要，在Rust中，你可以非常轻松的构建测试。测试需要放在测试模块中，你可以在代码编写完成后直接在当前文件中编写测试，也可以新建一个测试文档专门编写
 
 ### 4.3.1 单元测试
 
+单元测试主要对局部模块内的代码进行测试。测试代码放在测试模块中
+
+```
+use std::fs::File;
+use std::io::Error;
+
+fn read_file(path: &str) -> Result<File, Error> {
+    // 2.1 读取文件
+    let file = File::open(path);
+
+    // 2.2 判断文件是否存在
+    match file {
+        Ok(file) => Ok(file),
+        Err(error) => Err(error),
+    }
+}
+
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    fn can_hold(&self, other: &Rectangle) -> bool {
+        self.width > other.width && self.height > other.height
+    }
+}
+
+pub fn add_two(a: i32) -> i32 {
+    a + 2
+}
+
+pub struct Guess {
+    value: i32,
+}
+
+impl Guess {
+    pub fn new(value: i32) -> Guess {
+        if value < 1 || value > 100 {
+            panic!("Guess value must be between 1 and 100, got {}.", value);
+        }
+
+        Guess { value }
+    }
+}
+
+// 测试模块
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // 1 使用 assert! 宏断言结果是抖为 true
+
+    #[test]
+    fn larger_can_hold_smaller() {
+        let larger = Rectangle {
+            width: 8,
+            height: 7,
+        };
+        let smaller = Rectangle {
+            width: 5,
+            height: 1,
+        };
+
+        assert!(larger.can_hold(&smaller)); // 可以直接断言，也可以带上提示信息
+        assert!(
+            larger.can_hold(&smaller),
+            "larger is {:?}, smaller is {:?}",
+            larger,
+            smaller
+        );
+    }
+
+    // 2 使用 assert_eq! 宏断言两个值相等
+
+    #[test]
+    fn it_adds_two() {
+        assert_eq!(4, add_two(2));
+    }
+
+    // 3 使用 assert_ne! 宏断言两个值不相等
+    #[test]
+    fn it_adds_two() {
+        assert_ne!(3, add_two(2));
+    }
+
+    // 4 使用 should_panic 宏断言函数会 panic
+
+    #[test]
+    #[should_panic]
+    fn greater_than_100() {
+        Guess::new(200);
+    }
+
+    // 5 使用Result<T, E>类型的断言
+
+    #[test]
+    fn read_file_should_works() -> Result<(), String> {
+        match read_file("rust.txt") {
+            Ok(_) => Ok(()),
+            Err(_) => Err(String::from("file did not exit")),
+        }
+    }
+}
+```
+
+### 4.3.2 文档测试
+
+文档测试也是单元测试，只不过不把测试代码写在测试模块中二是写在文档备注中
+
+```
+/// ```
+/// fn add(a: i32, b: i32) -> i32 {
+/// a + b
+/// }
+/// let result = add(2, 3);
+/// assert_eq!(result, 5);
+
+/// ```
+fn add() {}
+```
+
+本文档的所有代码都以文档测试形式编写，你可以直接运行
+
 ### 4.3.3 集成测试
+
+集成测试对于整个lib crate来说是外部的，目的在于测试各个模块是否能够一起正确的工作，创建集成测试需要创建于src同级的tests目录执行
+
+在lib.rs下创建一个模块，并导出定义的函数
+
+```
+pub use my_add::*;
+mod my_add {
+
+    pub fn add() -> i32 {
+        2 + 2
+    }
+}
+```
+
+新建src同级目录tests，并创建文件add_test.rs,并在其中先引入函数，再编写测试
+
+```
+use module_four::add;
+
+#[test]
+fn it_adds_two() {
+    assert_eq!(4, add());
+}
+```
+
+然后在项目下运行`cargo test`就可以测试了
 
 ## 4.4 项目练习
 
