@@ -5,10 +5,9 @@
 
 ```
 
-    // 1 Vec
-    // Vec是动态大小，相比起数组来说，它更加常用
-    // Vec中的元素必须相同
-
+    /// 1 Vec
+    /// Vec是动态大小，相比起数组来说，它更加常用
+    /// Vec中的元素必须相同
     let mut vec1 = Vec::new();
     let mut vec2 = vec![];
 
@@ -31,9 +30,8 @@
     println!("{}", vec2.capacity()); // 4
     println!("{:?}", vec2.as_ptr()); // 0x7fafc9f05b70
 
-    // 2 HashMap
-
-    // HashMap并不是预导入的，需要手动引入当前作用域
+    /// 2 HashMap
+    /// HashMap并不是预导入的，需要手动引入当前作用域
     use std::collections::HashMap;
 
     // 使用new方法创建
