@@ -141,7 +141,7 @@ Hello, world!
 
 Rust是强类型语言，每个值都有确切的类型
 
-#### 1.3.3.1 标量类型
+#### 标量类型
 
 ```
  // 1 整数类型
@@ -176,7 +176,7 @@ Rust是强类型语言，每个值都有确切的类型
 
 1. [Rust官方文档关于基础类型的详细介绍](https://rustwiki.org/zh-CN/book/ch03-02-data-types.html)
 
-#### 1.3.3.2 复合类型
+#### 复合类型
 
 Rust中的复合类型主要有元组和数组
 
@@ -214,7 +214,7 @@ Rust中的复合类型主要有元组和数组
 
 ### 1.3.3 进阶数据类型
 
-#### 1.3.3.1 字符串
+#### 字符串
 
 Rust中的字符串比较复杂，有多种形式，适用于不同的场景。核心是需要掌握&str和String
 
@@ -263,7 +263,7 @@ Rust在编译代码时需要在编译期就能够确定类型的大小，而字�
 2. [一些字符串练习的小例子](https://github.com/rust-lang-cn/rustlings-cn/tree/main/exercises/strings)
 3. [官方文档中关于切片的更多内容](https://rustwiki.org/zh-CN/book/ch04-03-slices.html)
 
-#### 1.3.3.2 引用
+#### 引用
 
 Rust中的引用类型是一等公民，从可变性上可以分为可变引用和不可变引用
 
@@ -298,7 +298,7 @@ Rust中的引用类型是一等公民，从可变性上可以分为可变引用�
 
 2.[官方文档中对引用的更多介绍](https://rustwiki.org/zh-CN/book/ch04-02-references-and-borrowing.html)
 
-#### 1.3.3.3 集合
+#### 集合
 
 两个重要的集合Vec和HashMap，这里的集合指的是它们都聚集了多个同类型的元素
 
@@ -353,7 +353,7 @@ Rust中的引用类型是一等公民，从可变性上可以分为可变引用�
 
 1. [官方文档中对集合的更多介绍](https://rustwiki.org/zh-CN/book/ch08-00-common-collections.html)
 
-#### 1.3.3.4 结构体
+#### 结构体
 
 ```
 // 1 结构体
@@ -396,7 +396,7 @@ Rust中的引用类型是一等公民，从可变性上可以分为可变引用�
 
 1. [官方文档对于结构体的介绍](https://rustwiki.org/zh-CN/book/ch05-00-structs.html)
 
-#### 1.3.3.5 枚举
+#### 枚举
 
 ```
 // 枚举在形式上和结构体较为相似
@@ -429,7 +429,7 @@ Rust中的引用类型是一等公民，从可变性上可以分为可变引用�
 
 1. [官方文档中对于枚举的介绍](https://rustwiki.org/zh-CN/book/ch06-01-defining-an-enum.html)
 
-#### 1.3.3.6 函数
+#### 函数
 
 ```
  // 1 函数定义
@@ -479,7 +479,7 @@ Rust中的引用类型是一等公民，从可变性上可以分为可变引用�
 
 1.[官方文档中关于函数的介绍](https://rustwiki.org/zh-CN/book/ch03-03-how-functions-work.html)
 
-#### 1.3.3.7 闭包
+#### 闭包
 
 ```
 // 1 闭包定义
@@ -513,7 +513,7 @@ Rust中的引用类型是一等公民，从可变性上可以分为可变引用�
 
 1.[官方文档中关于闭包的介绍](https://rustwiki.org/zh-CN/book/ch13-01-closures.html)
 
-#### 1.3.3.8 泛型
+#### 泛型
 
 Rust语言支持泛型编程，在实际操作中会大量涉及到泛型。泛型提供了抽象能力，让代码复用性更强。泛型一般和其它数据结构结合使用
 
@@ -591,7 +591,7 @@ Rust语言支持泛型编程，在实际操作中会大量涉及到泛型。泛�
 
 Rust程序在书写上并没有太复杂的结构，循环和模式匹配基本能够满足绝大多数场景需求
 
-#### 1.3.4.1 循环
+#### 循环
 
 Rust有三种循环结构for循环，loop和while
 
@@ -638,7 +638,7 @@ Rust有三种循环结构for循环，loop和while
     }
 ```
 
-#### 1.3.4.2 模式匹配
+#### 模式匹配
 
 Rust中的模式匹配指的是结构上的匹配，最常用有match、while let 、let 、if let 
 
@@ -1236,11 +1236,11 @@ Rust中的trait非常强大，它几乎和所有类型相关，你可以通过�
 
 标准库中预导入了很多trait，可以直接在文件中使用而不用` use`导入，你可以大概看一下下列表格，消除对 trait的陌生感
 
-![image-20230302004216125](/Users/qinjianquan/Career/rust/image/4.3.png)
+![image-20230302004216125](/Users/qinjianquan/Career/rust/rust-co-learn/images/prelude_traits.png)
 
 如下是不同场景下经常使用的trait
 
-![img](https://pic2.zhimg.com/80/v2-3d9eb5c90181e8e59e1bb0d062107a39_1440w.webp)
+![img](/Users/qinjianquan/Career/rust/rust-co-learn/images/traits_fetures.png)
 
 ### 2.3.2 trait与类型转换
 
@@ -1777,7 +1777,7 @@ Rust提供了迭代器trait,从而实现遍历，for循环本质上是一个语�
 
 Rust中有多个智能指针，可以参考下表，这里总结了一个表，方便你阅读
 
-![image-20230203001747611](/Users/qinjianquan/Library/Application Support/typora-user-images/image-20230203001747611.png)
+![image-20230203001747611](/Users/qinjianquan/Career/rust/rust-co-learn/images/smart_pointers.png)
 
 ## 3.2 类型进阶
 
@@ -2191,7 +2191,7 @@ mod tests {
 
 ### 4.3.2 文档测试
 
-文档测试也是单元测试，只不过不把测试代码写在测试模块中二是写在文档备注中
+文档测试也是单元测试，只不过不把测试代码写在测试模块中而是写在文档备注中
 
 ```
 /// ```
