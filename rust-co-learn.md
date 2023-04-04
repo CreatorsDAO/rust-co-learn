@@ -1236,11 +1236,11 @@ Rust中的trait非常强大，它几乎和所有类型相关，你可以通过�
 
 标准库中预导入了很多trait，可以直接在文件中使用而不用` use`导入，你可以大概看一下下列表格，消除对 trait的陌生感
 
-![image-20230302004216125](/Users/qinjianquan/Career/rust/rust-co-learn/images/prelude_traits.png)
+![image-20230302004216125](https://github.com/CreatorsDAO/rust-co-learn/blob/main/images/prelude_traits.png)
 
 如下是不同场景下经常使用的trait
 
-![img](/Users/qinjianquan/Career/rust/rust-co-learn/images/traits_fetures.png)
+![img](https://github.com/CreatorsDAO/rust-co-learn/blob/main/images/traits_fetures.png)
 
 ### 2.3.2 trait与类型转换
 
@@ -1777,7 +1777,7 @@ Rust提供了迭代器trait,从而实现遍历，for循环本质上是一个语�
 
 Rust中有多个智能指针，可以参考下表，这里总结了一个表，方便你阅读
 
-![image-20230203001747611](/Users/qinjianquan/Career/rust/rust-co-learn/images/smart_pointers.png)
+![image-20230203001747611](https://github.com/CreatorsDAO/rust-co-learn/blob/main/images/smart_pointers.png)
 
 ## 3.2 类型进阶
 
