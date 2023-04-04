@@ -4,10 +4,8 @@
 /**
 
 ```
-
-     // 1 枚举
-
-    // 枚举在形式上和结构体较为相似
+    /// 枚举
+    /// 枚举在形式上和结构体较为相似
     enum Subject {
         Math,
         Chinese,
@@ -18,7 +16,6 @@
     let subject = Subject::English(String::from("English"));
 
     //标准库中两个比较重要的枚举 Option和 Result
-
     // Result 用于一些处操作可能遇到错误的场景，比如打开文件时，如果成功，返回文件，遇到错误时返回一个Error
     use std::fs::File;
 
@@ -30,8 +27,13 @@
 
     use std::collections::HashMap;
 
-    let map: HashMap<&str, u32> = HashMap::new();
-    let v: Option<&u32> = map.get("rust");
+    let mut map: HashMap<&str, u32> = HashMap::new();
+    let v1: Option<&u32> = map.get("rust"); // None
+    println!("{:?}", v1);
+
+    map.insert("rust", 1);
+    let v2: Option<&u32>  = map.get("rust");
+    println!("{:?}", v2);
 
 ```
 */

@@ -4,7 +4,6 @@
 /**
 
 ```
-
     // 1 不可变借用
     let num = 42;
     let immutable_s = &num;
@@ -18,7 +17,7 @@
     let person_tuple = ("Rust", 13, true);
 
     let ptr = &person_tuple;
-    println!("{}", ptr.0);
+    println!("{}", ptr.0); // "Rust"
 
     let mut arr = ["Rust", "Go", "C++"];
 
@@ -32,6 +31,6 @@
 ```
 */
 
-pub fn string() {
+pub fn quotation() {
     println!("");
 }
