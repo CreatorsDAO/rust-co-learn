@@ -2240,21 +2240,195 @@ fn it_adds_two() {
 
 # 模块五：异步编程和无畏并发
 
-## 1 并发编程
+## 5.1 并发编程
 
-## 2 异步编程
+### 5.1.1 原理介绍
 
-## 3 项目实战
+在实际的业务场景中，我们可能会并发或者异步处理各种各样的请求，甚至是二者相结合，以提高请求处理效率。在此之前，我们先区别两个概念：并发和并行：并发和并行都是对“多任务”处理的描述，其中并发是轮流处理，而并行是同时处理
 
-## 4 项目练习
+现代个人计算机通常拥有多核心，通过将任务分成多个队列并交给不同核心处理并行执行，可以极大提高处理效率和速度
+
+在操作系统层面，多线程管理任务队列，每个线程管理一个任务队列，并可根据空闲程度进行任务调度。程序只与操作系统线程交互，而不关心CPU核心数量，当线程将任务分配给CPU核心执行时，若只有一个核心，则只能同时处理一个任务。此时微观上CPU快速轮换处理不同的任务，带来了宏观上的同时运行假象。若有N个核心时，就能够实现同时处理N个任务
+
+当操作系统的线程为M,CPU核心数量为N时，在M个线程中的任务会被分配给N个CPU核心处理，此时就实现了M:N处理模型。此时并发和并行同时发生
+
+操作系统为编程语言提供了创建线程的API，此时程序内创建的线程数量会和该程序占用操作系统中的线程数量相等，即1:1模型。Rust就是这种模型，当你在程序中创建了一个线程时，这意味着你创建了一个操作系统线程
+
+有些编程语言实现了自己的线程模型（例如绿色线程和协程），程序内的M个线程会映射到N个操作系统线程上运行，这被称为M:N线程模型，其中M和N没有特定的限制关系。Go语言是一个典型的例子。其他语言则使用Actor模型，基于消息传递实现并发，例如Erlang语言
+
+### 5.1.2 并发实战
+
+**在程序中创建多个线程**
+
+尽管并发编程涉及计算机的物理基础和一些操作系统知识，比较费解。但是在创建上非常简单，你只需要借助编程语言提供好的接口直接创建即可
+
+```
+// main函数是主线程
+fn main() {
+    // 创建线程
+
+    use std::thread;
+
+    let mut threads = vec![];
+
+    // 创建5个线程，它们和main函数的线程是并行的，并且执行结束的时间不一定
+    for i in 0..5 {
+        let handle = thread::spawn(move || {
+            println!("Hello from thread {}", i);
+        });
+
+        threads.push(handle);
+    }
+
+    // 等待线程执行结束
+    for thread in threads {
+        thread.join().unwrap();
+    }
+}
+```
+
+**在多个线程间共享资源**
+
+并发编程除了在原理理解上比较难之外，另一个难点是异步间共享数据。一般情况下，线程间共享数据主要有两种方式，共享内存和消息传递，其中共享内存还可以分为无锁共享和有锁共享。在Rust中，你可以通过通道（channel）在线程间发送数据，还可以通过锁来独占访问数据，也可以通过直接操作原子类型，实现无锁共享，下面是几个例子
+
+```
+// 1 通过 channel 共享数据
+
+    use std::sync::mpsc;
+    use std::thread;
+
+    // 创建通道（信息接收者和信息发送者）
+
+    let (tx, rx) = mpsc::channel();
+
+    thread::spawn(move || {
+        let tx1 = tx.clone();
+        let tx2 = tx.clone();
+
+        // 在线程中创建变量
+        let val1 = String::from("hi");
+        let val2 = String::from("hello");
+
+        // 将变量发送给别的线程
+        tx1.send(val1).unwrap();
+        tx2.send(val2).unwrap();
+        // println!("{:?}", val); // 不能再使用
+    });
+
+    // 接收数据
+    for received in rx {
+        println!("Got: {}", received);
+    }
+
+    // 2 使用锁共享数据
+
+    use std::sync::{Arc, Mutex};
+
+    // 在使用线程时，我们需要将数据移入线程内，但是一旦移入，数据就不可用了，所以使用引用计数容器Arc共享所有权
+    // 同时通过Mutex来保证独占访问
+
+    let counter = Arc::new(Mutex::new(0));
+    let mut handles = vec![];
+
+    for _ in 0..10 {
+        let counter = Arc::clone(&counter);
+
+        let handle = thread::spawn(move || {
+            // 拿到锁
+            let mut num = counter.lock().unwrap();
+            // 修改数据
+            *num += 1;
+
+            // 锁释放
+            // lock 调用会一个叫做 MutexGuard 的智能指针
+            // 这个智能指针实现了 Deref 和 Drop trait
+            // 可以自动解引用以及丢弃值
+            // 此处自动调用了 drop()
+        });
+
+        handles.push(handle);
+    }
+
+    // 等待所有线程完成
+    for handle in handles {
+        handle.join().unwrap();
+    }
+    println!("Result: {}", *counter.lock().unwrap());
+
+
+    // 3 使用原子类型共享数据
+
+    use std::sync::atomic::{compiler_fence, AtomicBool};
+
+    // 使用原子类型创建一个锁，通过引用计数获得共享所有权
+    let spin_lock = Arc::new(AtomicBool::new(false));
+
+    // 引用计数 +1
+    let spin_lock_clone = Arc::clone(&spin_lock);
+
+    let sc = Arc::clone(&spin_lock);
+
+    let thread = thread::spawn(move || {
+        
+        // 写操作，并指定内存顺序 release 语义：写屏障之前的读写操作不能重排在写屏障之后
+        spin_lock_clone.store(true, std::sync::atomic::Ordering::SeqCst);
+
+        println!("spin_lock status a {:?}", sc);
+        // 休眠
+        let time = std::time::Duration::from_secs(2);
+        std::thread::sleep(time);
+
+        compiler_fence(std::sync::atomic::Ordering::Release);
+        // 写操作， 并指定内存顺序 release 语义：写屏障之前的读写操作不能重排在写屏障之后
+        // 上面有一个写操作，并且下面的指令要求不能在此之后
+        spin_lock_clone.store(false, std::sync::atomic::Ordering::SeqCst);
+        println!("spin_lock status b {:?}", sc);
+    });
+
+    // 读操作 指定内存顺序 acquire 语义 读屏障之后的读写操作不能重排到读写屏障之前
+    // 上面的线程中有两条写指令，下面的指令要求之后的读写操作不能在此之前
+    while spin_lock.load(std::sync::atomic::Ordering::SeqCst) == false {
+        println!("spin_lock status c {:?}", spin_lock)
+    }
+
+    println!("spin_lock status d {:?}", spin_lock);
+
+    if let Err(e) = thread.join() {
+        println!("Thread had an error {:?}", e);
+    }
+```
+
+## 5.2 异步编程
+
+### 5.2.1 异步原理
+
+
+
+### 5.2.2 异步运行时
+
+### 5.2.3 异步实战
+
+
+
+## 5.3 项目实战
 
 # 模块六：Rust内容扩展（选学）
 
-## 1 宏编程
+## 6.1 宏编程
 
-## 2 Unsafe Rust
+6.1.1 宏介绍
 
-## 3 阅读材料
+6.1.2 宏的种类
+
+6.1.3 宏编程实战
+
+## 6.2 Unsafe Rust
+
+6.2.1 Unsafe Rust介绍
+
+6.2.2 Unsafe Rust编程
+
+
 
 
 
