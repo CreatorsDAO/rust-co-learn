@@ -79,3 +79,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 pub fn async_await() {
     println!("");
 }
+
+// Cargo.toml中的依赖项
+// reqwest = { version = "0.11", features = ["blocking", "json"] }
+// tokio = { version = "1", features = ["full"] }
+// serde = { version = "1.0", features = ["derive"] }
