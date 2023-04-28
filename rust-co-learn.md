@@ -2238,7 +2238,7 @@ fn it_adds_two() {
 
 ## 4.4 项目练习
 
-# 模块五：异步编程和无畏并发
+# 模块五：并发编程和异步编程
 
 ## 5.1 并发编程
 
@@ -2400,15 +2400,111 @@ fn main() {
 
 ## 5.2 异步编程
 
+我们再区别一下同步和异步，从调用者得视角看同步指调用直到获得结果时才返回，而异步指在未获得结果时先返回。
+
+1. 同步IO模型下，程序执行时，数据从外部到程序内部的整个过程可以分为两段：数据准备和数据拷贝阶段（从操作系统内核缓冲区复制到进程缓冲区）。程序在使用数据时需要通过系统调用来请求数据
+
+数据准备阶段：可以是阻塞的（阻塞线程，直到数据准备好）和非阻塞的（立即返回错误，然后通过轮询数据，直到数据准备就绪）
+
+数据拷贝阶段：把数据从内核缓冲区拷贝至应用程序缓冲区（用户态缓冲区），同步I/O下永远阻塞
+
+2. 异步I/O可以把数据的准备和复制过程看作是一个操作，均由操作系统完成
+
 ### 5.2.1 异步原理
 
+Rust中的异步编程通过事件循环或异步运行时来实现，它避免了线程上下文切换的开销和内存占用。异步任务在等待I/O操作完成时可以挂起，而不需要占用线程。当I/O操作完成时，异步任务可以继续执行，从而减少了线程切换的开销。因此，异步编程可以更高效地利用系统资源，提高应用程序的性能和可靠性
 
+另外，注意Rust中的异步IO编程模型包含了操作系统的同步IO和异步IO
 
 ### 5.2.2 异步运行时
 
-### 5.2.3 异步实战
+Rust只提供了零成本的异步编程抽象而不内置运行时，这意味着你可以根据实际业务需求替换运行时，如tokio，async-std，no_std和smol等
 
+### **5.2.3 async和await**
 
+Rust中提供了一个Future trait，并在future的基础上提供 async/await语法糖，它的本质是一个状态机，也叫无栈协程
+
+零成本抽象：async/await语法糖在编译期就会展开成为固定类型
+
+这里的async/await语法很形象，比较好理解，早期Rust中的异步写法是一串串链式调用，一个主要的问题是会产生很多内嵌代码
+
+，不好处理。而使用async/await语法允许你像写同步代码一样写一步代码
+
+异步任务可以看作是一种绿色线程，在线程内执行，它们的区别在用户态，没有线程上下文切换开销
+
+### 5.2.4 异步实战
+
+尽管Rust异步编程原理理解比较困难，但是在实际使用中它非常简单，下面是一个案例
+
+```
+use reqwest::{blocking::Client, Error};
+use serde::Deserialize;
+use std::vec::Vec;
+use tokio;
+
+#[derive(Deserialize, Debug)]
+struct Post {
+    userId: u32,
+    id: u32,
+    title: String,
+    body: String,
+}
+
+async fn fetch_post_async(url: &str) -> Result<Post, Error> {
+    let response = reqwest::get(url).await?;
+    let response = response.error_for_status()?;
+    let post: Post = response.json().await?;
+    Ok(post)
+}
+
+fn fetch_post_sync(url: &str) -> Result<Post, Error> {
+    let client = Client::new();
+    let response = client.get(url).send()?;
+    let response = response.error_for_status()?;
+    let post: Post = response.json()?;
+    Ok(post)
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let urls = vec![
+        "https://jsonplaceholder.typicode.com/posts/1",
+        "https://jsonplaceholder.typicode.com/posts/2",
+        "https://jsonplaceholder.typicode.com/posts/3",
+    ];
+
+    let urls_clone = urls.clone();
+
+    println!("同步请求：");
+    let sync_thread = std::thread::spawn(move || {
+        for url in &urls_clone {
+            match fetch_post_sync(url) {
+                Ok(post) => println!("Post信息: {:?}", post),
+                Err(err) => eprintln!("请求失败: {:?}", err),
+            }
+        }
+    });
+    sync_thread.join().unwrap();
+
+    println!("异步请求：");
+    let mut tasks = Vec::new();
+    for url in urls {
+        let task = tokio::spawn(async move {
+            match fetch_post_async(&url).await {
+                Ok(post) => println!("Post信息: {:?}", post),
+                Err(err) => eprintln!("请求失败: {:?}", err),
+            }
+        });
+        tasks.push(task);
+    }
+
+    for task in tasks {
+        task.await?;
+    }
+
+    Ok(())
+}
+```
 
 ## 5.3 项目实战
 

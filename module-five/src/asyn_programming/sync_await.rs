@@ -1,3 +1,10 @@
+//! 异步实战
+//!
+
+/**
+
+```
+
 use reqwest::{blocking::Client, Error};
 use serde::Deserialize;
 use std::vec::Vec;
@@ -64,4 +71,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     Ok(())
+}
+
+```
+*/
+
+pub fn async_await() {
+    println!("");
 }
