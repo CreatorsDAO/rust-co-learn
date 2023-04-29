@@ -6,3 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+lazy_static = "1.4.0"
+derive-macro = { path = "../derive-macro" }
+attribute-macro = { path = "../attribute-macro" }
+function-like-macro = { path = "../function-like-macro" }

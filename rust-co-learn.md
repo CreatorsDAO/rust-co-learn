@@ -2539,14 +2539,169 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ## 6.1 宏编程
 
-6.1.1 宏介绍
+### 6.1.1 宏介绍
 
-6.1.2 宏的种类
+宏（macro）是一种编程技术，允许程序员编写可在编译时或预处理时展开的代码片段。许多高级编程语言支持宏或类似的功能。Rust 支持两种类型的宏：声明式宏（Declarative Macros）和过程宏（Procedural Macros）
 
-6.1.3 宏编程实战
+### 6.1.2 声明宏
+
+声明式宏类似于 C 和 C++ 中的预处理器宏，但更强大和安全。声明式宏使用 `macro_rules!` 关键字定义，并通过模式匹配和代码生成来工作。它们可以用来减少代码重复、创建简洁的 DSL（领域特定语言）等
+
+如下是一个声明宏的声明和使用案例
+
+```
+// 导入 HashMap，用于存储键值对。
+use std::collections::HashMap;
+// 导入 lazy_static 宏，用于创建静态变量。
+use lazy_static::lazy_static;
+
+// 定义一个名为 `create_map` 的宏，它接受一系列键值对，并在展开时创建一个包含这些键值对的 HashMap。
+// 宏使用了匹配表达式 (`$key:expr => $value:expr`) 来捕获键值对，并使用重复模式 (`$()*`) 来插入每个键值对到 HashMap。
+macro_rules! create_map {
+    // 接受一系列键值对，每个键值对以 `$key:expr => $value:expr` 的形式给出。
+    // 最后一个键值对后面可以有一个可选的逗号。
+    ( $($key:expr => $value:expr),* $(,)? ) => {{
+        // 创建一个新的 HashMap。
+        let mut map = HashMap::new();
+        // 使用重复模式，对每一个键值对执行以下代码。
+        $(
+            // 将每个键值对插入到 HashMap 中。
+            map.insert($key, $value);
+        )*
+        // 返回填充好的 HashMap。
+        map
+    }};
+}
+
+fn main() {
+    // 使用 lazy_static 宏创建一个名为 `FRUITS` 的静态 HashMap。
+    // 这里我们使用 `create_map!` 宏来初始化 HashMap。
+    lazy_static! {
+        static ref FRUITS: HashMap<&'static str, u32> = create_map! {
+            "apple" => 1,
+            "banana" => 2,
+            "orange" => 3,
+            "peach" => 4,
+        };
+    }
+
+    // 打印 FRUITS 的内容。注意，我们需要使用 *FRUITS 来解引用 FRUITS。
+    println!("{:?}", *FRUITS);
+}
+```
+
+声明宏的一大特征是Token的匹配，Token有多种，如下，相当于宏的关键字，在实际代码中，尤其涉及到重复模式时，可以考虑用声明宏来消除样板代码
+
+```
+$name:ident：标识符（identifier），如变量名、函数名等。例如：$func_name:ident。
+$e:expr：表达式（expression），如 1 + 2、my_var 等。例如：$my_expression:expr。
+$t:ty：类型（type），如 i32、String、Vec<T> 等。例如：$my_type:ty。
+$p:pat：模式（pattern），如用于匹配的字面量、变量、通配符等。例如：$my_pattern:pat。
+$s:stmt：语句（statement），如赋值语句、函数调用等。例如：$my_statement:stmt。
+$b:block：代码块（block），由一对大括号包围的一系列语句。例如：$my_block:block。
+$m:meta：元数据（metadata），如属性（attribute）中的元数据。例如：$my_metadata:meta。
+$i:item：项（item），如函数、结构体、枚举等顶级定义。例如：$my_item:item。
+$v:vis：可见性（visibility），如 pub 关键字。例如：$my_visibility:vis。
+$l:lifetime：生命周期（lifetime），如生命周期参数 'a。例如：$my_lifetime:lifetime。
+$tt:tt：单个语法树（token tree），可以匹配任何单个 token。例如：$my_token_tree:tt。
+```
+
+### 6.1.3 过程宏
+
+过程宏可以分为三种类型：自定义派生（custom derive）、属性宏（attribute macros）和函数宏（function-like macros）。它们的原理如下：
+
+1. 自定义派生（Custom Derive）：
+
+自定义派生允许你为自定义数据类型自动实现某个 trait。当你在数据类型上使用 `#[derive(MyTrait)]` 时，编译器会调用实现了 `MyTrait` 自定义派生的过程宏。该过程宏将接收输入类型的定义，然后生成该类型所需的 trait 实现。
+
+自定义派生宏需要使用 `#[proc_macro_derive]` 属性进行标记，它们的输入是 `syn::DeriveInput` 类型，输出是 `proc_macro::TokenStream` 类型。
+
+声明宏一般定义在项目的某个文件中，但是派生宏一般都是定义在一个独立的包中，然后引入使用
+
+```
+cargo new derive-macro --lib # 创建一个独立的package
+```
+
+```
+# 在Cargo.toml中写入必备的依赖
+[dependencies]
+syn = "1.0"
+quote = "1.0"
+proc-macro2 = "1.0"
+
+[lib]
+proc-macro = true
+```
+
+```
+// 在lib.rs中编写宏代码
+
+// 导入所需库
+extern crate proc_macro;
+use proc_macro::TokenStream;
+use quote::quote;
+use syn::{parse_macro_input, DeriveInput};
+
+// 使用 proc_macro_derive 属性标记自定义派生宏，并将宏命名为 simple_debug_derive。
+#[proc_macro_derive(SimpleDebug)]
+pub fn simple_debug_derive(input: TokenStream) -> TokenStream {
+    // 将输入的 TokenStream 解析为 DeriveInput 结构体。
+    let input_ast = parse_macro_input!(input as DeriveInput);
+    // 从 DeriveInput 结构体中提取类型的名称。
+    let name = &input_ast.ident;
+
+    // 使用 quote 宏构造实现 SimpleDebug 的代码。
+    let expanded = quote! {
+        // 为指定类型实现 std::fmt::Debug trait。
+        impl std::fmt::Debug for #name {
+            // 实现 fmt 方法。
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                // 使用 write! 宏将类型名称写入 Formatter。
+                write!(f, "Instance of {}", stringify!(#name))
+            }
+        }
+    };
+
+    // 将生成的代码转换为 TokenStream 并返回。
+    expanded.into()
+}
+```
+
+```
+# 在其它包中引如定义好的包
+[dependencies]
+derive-macro = { path = "../derive-macro" }
+```
+
+```
+// 正常使用即可
+use derive_macro::SimpleDebug;
+
+// 通过 #[derive(SimpleDebug)] 语法应用自定义派生宏
+#[derive(SimpleDebug)]
+struct TestStruct;
+
+fn main() {
+    let test_instance = TestStruct;
+    // 调用 Debug trait 的实现
+    println!("{:?}", test_instance);
+}
+```
+
+2. 属性宏（Attribute Macros）：
+
+属性宏类似于编译器注解，可以应用于项（如函数、结构体、模块等）。属性宏接收被注解的项的定义，然后可以根据需要修改或扩展这些项的行为。属性宏使用 `#[proc_macro_attribute]` 属性进行标记，输入为 `proc_macro::TokenStream`（表示属性参数）和 `syn::Item`（表示被注解的项），输出也是 `proc_macro::TokenStream` 类型。
+
+3. 函数宏（Function-like Macros）：
+
+函数宏看起来像函数调用，但在编译时展开。这类宏可以用于生成代码、实现编译时计算等。函数宏使用 `#[proc_macro]` 属性进行标记，输入和输出都是 `proc_macro::TokenStream` 类型。
+
+为了编写过程宏，通常需要使用 `proc_macro`、`syn` 和 `quote` 这三个库。`proc_macro` 是 Rust 标准库的一部分，用于处理过程宏的输入和输出；`syn` 库用于解析 Rust 代码；`quote` 库用于生成 Rust 代码
 
 ## 6.2 Unsafe Rust
 
-6.2.1 Unsafe Rust介绍
+### 6.2.1 Unsafe Rust介绍
 
-6.2.2 Unsafe Rust编程
+
+
+### 6.2.2 Unsafe Rust编程

@@ -9,6 +9,6 @@ git clone git@github.com:shiyivei/rust-co-learn.git
 使用cargo doc 打开
 
 ```
-cargo doc --open
+cargo doc --no-deps --open
 ```
 
