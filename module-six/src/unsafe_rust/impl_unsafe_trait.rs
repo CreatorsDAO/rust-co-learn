@@ -1,3 +1,10 @@
+//! 实现不安全的trait
+//!
+
+/**
+
+```
+
 unsafe trait UnsafeTrait {
     fn unsafe_method(&self);
 }
@@ -19,3 +26,9 @@ fn main() {
 }
 
 
+```
+*/
+
+pub fn impl_unsafe_trait() {
+    println!("");
+}

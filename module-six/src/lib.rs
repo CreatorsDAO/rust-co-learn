@@ -6,3 +6,4 @@
 
 pub mod declarative_macros;
 pub mod procedural_macros;
+pub mod unsafe_rust;

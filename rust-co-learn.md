@@ -2702,6 +2702,98 @@ fn main() {
 
 ### 6.2.1 Unsafe Rust介绍
 
+Rust 的设计初衷是提供内存安全性和线程安全性，因此其编译器会在编译时检查很多潜在的内存和线程安全问题。然而，在某些情况下，编程者需要执行编译器默认不允许的操作，如直接操作内存或调用不安全的外部函数。在这种情况下，Unsafe Rust 提供了一种途径，让程序员能够明确地执行这些操作
 
+要使用 Unsafe Rust，需要在代码块中使用 `unsafe` 关键字。在这个 `unsafe` 代码块内，你可以执行以下操作：
+
+1. 解引用裸指针（raw pointers）：裸指针是一种没有 Rust 编译器检查的指针，类似于 C 语言中的指针。裸指针分为两类：不可变的 `*const T` 和可变的 `*mut T`。
+2. 调用不安全的函数或方法：这些函数或方法需要在其签名中使用 `unsafe` 关键字。通常，不安全的函数或方法执行了编译器无法验证的操作，如调用底层系统 API 或直接修改内存。
+3. 访问或修改可变静态变量：Rust 中的静态变量具有固定的内存地址，它们在整个程序执行期间都是有效的。可变静态变量可能导致数据竞争，因此访问或修改它们需要在 `unsafe` 代码块中进行。
+4. 实现不安全的 trait：这些 trait 需要在其定义中使用 `unsafe` 关键字。实现不安全的 trait 通常表示它们需要满足某些编译器无法验证的约束。
+
+使用 Unsafe Rust 时需要特别小心，因为它可能导致内存安全问题和未定义行为。在编写 Unsafe Rust 代码时，程序员需要确保代码符合 Rust 的安全性约束。尽量将不安全的代码封装在安全的抽象中，以便在程序的其他部分使用安全的接口
 
 ### 6.2.2 Unsafe Rust编程
+
+下面是 Unsafe Rust 中每种情况的代码示例：
+
+1. 解引用裸指针
+
+```
+rustCopy code
+fn main() {
+    let x = 10;
+    let y = &x as *const i32;
+    let z = 0x12345678 as *const i32; // 假设这是一个无效的内存地址
+
+    unsafe {
+        println!("Value of x: {}", *y); // 输出 "Value of x: 10"
+        // println!("Value at address 0x12345678: {}", *z); // 不安全！可能导致未定义行为
+    }
+}
+```
+
+2. 调用不安全的函数或方法：
+
+```
+rustCopy code
+unsafe fn unsafe_function() {
+    // 执行不安全的操作，如直接操作内存或调用底层系统 API
+}
+
+fn main() {
+    unsafe {
+        unsafe_function(); // 调用不安全函数
+    }
+}
+```
+
+3. 访问或修改可变静态变量：
+
+```
+rustCopy code
+static mut COUNTER: i32 = 0;
+
+fn increment_counter() {
+    unsafe {
+        COUNTER += 1;
+    }
+}
+
+fn main() {
+    increment_counter();
+    unsafe {
+        println!("Counter value: {}", COUNTER); // 输出 "Counter value: 1"
+    }
+}
+```
+
+4. 实现不安全的 trait：
+
+```
+rustCopy code
+unsafe trait UnsafeTrait {
+    fn unsafe_method(&self);
+}
+
+struct MyStruct;
+
+unsafe impl UnsafeTrait for MyStruct {
+    fn unsafe_method(&self) {
+        // 执行不安全的操作
+    }
+}
+
+fn main() {
+    let my_struct = MyStruct;
+
+    unsafe {
+        my_struct.unsafe_method();
+    }
+}
+```
+
+## 6.3 课后习题
+
+1. 尝试编写一个声明宏和一个过程宏，体验它们的异同
+2. 结合你过去的编码经验，你是怎么理解Rust中的不安全问题的，安全问题有被扩大吗？
