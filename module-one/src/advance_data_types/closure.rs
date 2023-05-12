@@ -4,42 +4,31 @@
 /**
 
 ```
-     /// 1 函数定义
+    // 1 闭包定义
 
-    // 没有参数和返回值
-    fn foo() {
-        println!("foo")
-    }
+    // 闭包可以捕获环境变量,并且根据其对环境变量的操作可以分为以下三类
 
-    // 有参数和返回值
-    fn bar(s: &str) -> String {
-        String::from(s)
-    }
+    let c1 = || print!("未捕获环境变量");
 
-    // 参数类型必须显式声明，比如引用或者可变性
-    fn foobar(mut s: &str) -> &str {
-        s = "rust";
-        s
-    }
+    let v = "rust";
+    let c2 = || print!("捕获环境变量但不修改 {}", v);
 
-    /// 2 函数调用
-    foo();
-    bar("Rust");
-    foobar("go");
+    let mut s0 = String::from("hello");
 
-    /// 3 函数作为参数
-    fn a(f: fn() -> u32) -> u32 {
-        let value = f();
+    // 闭包的参数写在 ｜｜ 中
 
-        value
-    }
+    let mut c3 = |s: String| {
+        s0 = s + v;
+        println!("捕获并修改环境变量 {:?}", s0)
+    };
 
-    fn b() -> u32 {
-        42
-    }
+    // 2 闭包的调用
 
-    // 把函数作为参传给另一个函数
-    a(b);
+    // 闭包的调用同函数一样
+
+    c1();
+    c2();
+    c3(String::from("rust"));
 
 ```
 */

@@ -4,18 +4,18 @@
 /**
 
 ```
-    /// 1 &str
-    /// 字符串字面量实际上存放在程序的只读数据段中，在程序运行时会被加载到内存中读取
+    // 1 &str
+    // 字符串字面量实际上存放在程序的只读数据段中，在程序运行时会被加载到内存中读取
     let s = "Hello Rust";
     let mut s1 = "Hello Go";
 
     s1 = "Hello Rust";
     println!("{}", s1);
 
-    /// 2 String
-    /// String 是一个需要动态分配大小的，其大小在代码编译时是未知的，内部的容量是可以随时根据需要变化的。
+    // 2 String
+    // String 是动态分配大小的，其大小在代码编译时是未知的，内部的容量是可以随时根据需要变化
     // 我们可以通过多种方式创建一个String
-    // let s2 = String::new();         // An empty String
+    // let s2 = String::new();         // 空字符串
     // let s2 = "Hello Rust".to_string();
     // let s2: String = "Hello Rust".into();
     let s2 = String::from("Hello Rust");
