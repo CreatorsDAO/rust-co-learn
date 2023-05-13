@@ -1,4 +1,4 @@
-//! 2.1 所有权机制
+//! 1 所有权机制
 //!
 
 pub mod dynamic_sized_type;

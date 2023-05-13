@@ -1,4 +1,4 @@
-//! 2.3 trait
+//! 3 trait
 //!
 
 pub mod trait_intro;
