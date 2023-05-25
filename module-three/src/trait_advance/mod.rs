@@ -1,4 +1,4 @@
-//! 3.1 trait 进阶
+//! 1 trait 进阶
 //!
 
 pub mod trait_closure;

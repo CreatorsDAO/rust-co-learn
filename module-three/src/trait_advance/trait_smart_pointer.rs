@@ -1,4 +1,4 @@
-//! 3.1.3 trait与智能指针
+//! 1.3 trait与智能指针
 //!
 //!
 
@@ -166,6 +166,6 @@
 ```
 */
 
-pub fn trait_intro() {
+pub fn trait_smart_pointer() {
     println!("");
 }

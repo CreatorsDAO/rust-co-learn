@@ -1,9 +1,11 @@
-//! 3.2.4 特殊类型
+//! 2.4 特殊类型
 //!
 
 /**
 
 ```
+
+fn main() {
 
 // 1 特殊类型：PhantomData<T>
 
@@ -48,9 +50,11 @@
     let pinned = Pin::new(&my_type);
     let data = pinned.get_data();
     println!("{}", data);
+
+}
 ```
 */
 
-pub fn mut_container() {
+pub fn special_types() {
     println!("");
 }

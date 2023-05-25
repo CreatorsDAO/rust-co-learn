@@ -1489,21 +1489,21 @@ trait 在Rust中涵盖的内容非常多，它不光为一些常见的类型定�
 ### 3.1.1 trait与闭包
 
 ```
- // 1. 回顾三种类型的闭包
+    // 1. 回顾三种类型的闭包
     // 前面我们介绍过，闭包有三种类型：未捕获环境变量，捕获环境变量不修改，捕获环境变量并修改
 
-    // 1.1 未捕获环境变量的闭包
+    // 1.1 未捕获环境变量
     let c1 = || println!("didn't catch env var");
     c1();
 
-    // 1.2 捕获环境变量不修改的闭包
+    // 1.2 捕获但不修改环境变量
     let x = 10;
 
     let c2 = || println!("catch env var but not modify, x = {}", x);
 
     c2();
 
-    // 1.3 捕获环境变量并修改的闭包
+    // 1.3 捕获并修改环境变量
 
     let mut x = 10;
     let mut c3 = |a: i32| {
@@ -1521,7 +1521,7 @@ trait 在Rust中涵盖的内容非常多，它不光为一些常见的类型定�
     // 当声明一个闭包时，编译器会根据闭包的类型，自动推导出其实现的trait，一般情况下不需要手动实现
 
     // 3. 闭包作为函数参数传递
-    // 值得注意的是，在将闭包作为参数在函数中传递时类型的制定是通过trait来实现的
+    // 值得注意的是，在将闭包作为参数在函数中传递时，类型的指定是通过trait来实现的
 
     fn call_fn<F: Fn()>(f: F) {
         f();
@@ -1535,7 +1535,7 @@ trait 在Rust中涵盖的内容非常多，它不光为一些常见的类型定�
         f();
     }
 
-    // 闭包的调用 case1
+    // 闭包的调用 case 1
     // Rust编译器会根据你如何调用推导出闭包的类型，也就是实现哪个trait
 
     let c = || println!("closure");
@@ -1544,7 +1544,7 @@ trait 在Rust中涵盖的内容非常多，它不光为一些常见的类型定�
     call_fn(c); // 实现了Fn trait，FnMut trait,FnOnce trait,后面两种trait都是通过继承实现的
     call_fn_mut(c); // 实现了FnMut trait,FnOnce trait
 
-    // 闭包的调用 case2
+    // 闭包的调用 case 2
 
     let x = "10";
 
@@ -1554,7 +1554,7 @@ trait 在Rust中涵盖的内容非常多，它不光为一些常见的类型定�
     call_fn(c); // 实现了Fn trait，FnMut trait,FnOnce trait,后面两种trait都是通过继承实现的
     call_fn_mut(c); // 实现了FnMut trait,FnOnce trait
 
-    // 闭包的调用 case3
+    // 闭包的调用 case 3
 
     let mut x = String::from("10");
 
@@ -1583,12 +1583,16 @@ trait 在Rust中涵盖的内容非常多，它不光为一些常见的类型定�
     }
 ```
 
+**扩展资料**
+
+1.[官方文档中关于闭包的介绍](https://rustwiki.org/zh-CN/book/ch13-01-closures.html)
+
 ### 3.1.2 trait与迭代器
 
-Rust提供了迭代器trait,从而实现遍历，for循环本质上是一个语法糖
+Rust提供了迭代器trait,可以实现遍历功能
 
 ```
- // 1. for 循环与迭代器
+    // 1. for 循环与迭代器
 
     // 在rust中，for循环实际上的迭代器的语法糖
 
@@ -1618,6 +1622,9 @@ Rust提供了迭代器trait,从而实现遍历，for循环本质上是一个语�
     use std::slice::Iter;
     use std::slice::IterMut;
     use std::vec::IntoIter;
+    
+    
+    // 如果类型实现了迭代器 trait，则可以使用迭代器中的方法，例如：
 
     let map = HashMap::from([("rust", 1), ("go", 2), ("python", 3)]);
     let map_iter = map.into_iter();
@@ -1630,7 +1637,7 @@ Rust提供了迭代器trait,从而实现遍历，for循环本质上是一个语�
     let iter: Iter<i32> = v.iter(); // 转为 Iter 结构体， 不可变借用
     let iter_into: IntoIter<i32> = v.into_iter(); // 转为 IntoIter 结构体 ， 获取所有权
 
-    // 4 迭代器适配器
+    // 4. 迭代器适配器
     let vec = vec![1, 2, 3, 4, 5];
     let doubled: Vec<i32> = vec
         .iter()
@@ -1649,10 +1656,14 @@ Rust提供了迭代器trait,从而实现遍历，for循环本质上是一个语�
     }
 ```
 
+**扩展资料**
+
+1.[官方文档中关于迭代器的介绍](https://rustwiki.org/zh-CN/book/ch13-02-iterators.html)
+
 ### 3.1.3 trait与智能指针
 
 ```
- // 在展开Rust的智能指针之前，我们先区分一下Rust中的指针、引用和裸指针
+    // 在展开Rust的智能指针之前，我们先区分一下Rust中的指针、引用和裸指针
 
     // 1 指针、引用和智能指针
 
@@ -1815,6 +1826,10 @@ Rust中有多个智能指针，可以参考下表，这里总结了一个表，�
 
 ![image-20230203001747611](https://github.com/CreatorsDAO/rust-co-learn/blob/main/images/smart_pointers.png)
 
+**扩展资料**
+
+1.[官方文档中关于智能指针的介绍](https://rustwiki.org/zh-CN/book/ch15-00-smart-pointers.html)
+
 ## 3.2 类型进阶
 
 Rust中对于提供了很多类型，用于处理一些特殊的场景
@@ -1824,7 +1839,7 @@ Rust中对于提供了很多类型，用于处理一些特殊的场景
 Box可以将内存强制分配到堆上，并且它也是智能指针，可以自动解引用和管理堆内存。所以在使用的时候只需要使用它将数据分配到堆上，并不需要再考虑如何释放内存
 
 ```
- // 1 Box<T> 与数据分配
+    // 1 Box<T> 与数据分配
 
     // 在Rust中，你可以使用Box将数据强行存储到堆上
 
@@ -1847,10 +1862,10 @@ Box可以将内存强制分配到堆上，并且它也是智能指针，可以�
 
 ### 3.2.2 可变容器
 
-在编译期，我们需要使用mut显式声明变量的可变性。在运行时，Rust提供了可变容器Cell和RefCell允许修改不可变变量（这个过程实际上是通过原生指针来完成的
+在编译期，我们需要使用mut显式声明变量的可变性。在运行时，Rust提供了可变容器Cell和RefCell允许修改不可变变量（这个过程实际上是通过原生指针来完成的）
 
 ```
- // 1.编译期：通过 mut 显式声明变量的可变性，也叫外部可变性
+    // 1.编译期：通过 mut 显式声明变量的可变性，也叫外部可变性
     use std::cell::Cell;
     let can_not_change = "rust";
     let mut can_change = "go";
@@ -1937,7 +1952,7 @@ fn main() {
 2. 当使用 `unsafe` 代码时，可能会通过裸指针将引用类型转换为可变引用类型，从而破坏编译器对引用类型的保护
 
 ```
-// 2 特殊类型：Pin<T>
+    // 2 特殊类型：Pin<T>
 
     use std::pin::Pin;
 
@@ -1967,6 +1982,7 @@ fn main() {
 2. rust中的迭代器是如何实现的，有哪些主要的方法，你能编写几个使用案例吗
 3. 智能指针“智能”在哪里？Rust中常见的智能指针有哪些？
 4. Rust中有哪些容器类型，适用于哪些场景？
+5. 你能从标准库中发现其他比较特殊的类型吗？
 
 # 模块四：Rust项目基础
 

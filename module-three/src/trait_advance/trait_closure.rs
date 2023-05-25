@@ -1,4 +1,4 @@
-//! 3.1.1 trait与闭包
+//! 1.1 trait与闭包
 //!
 //!
 
@@ -101,6 +101,6 @@
 ```
 */
 
-pub fn trait_intro() {
+pub fn trait_closure() {
     println!("");
 }

@@ -1,4 +1,4 @@
-//! 3.1.2 trait与迭代器
+//! 1.2 trait与迭代器
 //!
 //!
 
@@ -111,6 +111,6 @@
 ```
 */
 
-pub fn trait_intro() {
+pub fn trait_iterator() {
     println!("");
 }
