@@ -117,7 +117,16 @@ Hello, world!
     let name = "rust";
     let age: u32 = 13;
 
-    println!("{},{}",name,age);
+    println!("{},{}", name, age);
+
+    let s = "32";
+
+    let s_to_i32 = s.parse::<i32>().unwrap();
+    let s_to_u32 = s.parse::<u32>().unwrap();
+
+    let s_to_unknown = s.parse::<i64>().unwrap();
+
+    print!("{},{}:", s_to_i32, s_to_u32);
 
     // 3 不变性
     // Rust中变量默认不可变，若需修改变量，需要使用mut关键字声明变量具有可变性
@@ -131,6 +140,10 @@ Hello, world!
     let mut language = "go";
     language = "rust";
 
+    println!("{}", language);
+    
+    // 5 变量遮蔽
+    let language = 32;
     println!("{}", language);
 ```
 
@@ -172,6 +185,7 @@ Rust是强类型语言，每个值都有确切的类型
     let c = 'z';
     let z = 'ℤ';
     let heart_eyed_cat = '😻';
+    let char_size = std::mem::size_of::<char>();
 ```
 
 **扩展资料**
@@ -278,7 +292,7 @@ Rust中的引用类型是一等公民，并且和借用指同一个概念。从�
     let num = 42;
     let immutable_s = &num;
 
-    // 2 不可变借用
+    // 2 可变借用
     let mut num = 42;
     let mutable_s = &mut num;
 
@@ -773,7 +787,7 @@ Rust是无GC（garbage collection）的语言，对于堆内存的管理主要�
     // 对于值42来说，它只有一个所有者，因此现在有两个42的值，并且它们的地址是不同的
 
     println!("owner1 addr {:p}", &owner1); // 0x7ff7b404dd90
-    println!("owner11 addr {:p}", &owner11); // 0x7ff7b404dd94
+      println!("owner11 addr {:p}", &owner11); // 0x7ff7b404dd94
 
     let owner2 = 42.0;
     let owner3 = true;
