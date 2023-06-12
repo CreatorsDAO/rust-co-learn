@@ -666,7 +666,7 @@ Rust中的模式匹配指的是结构上的匹配，最常用有match、while le
     // 1 match
     // match 是最长用的模式匹配，主要和枚举搭配使用，以匹配不同的枚举成员
 
-    match std::fs::File::open("rust.txtr") {
+    match std::fs::File::open("rust.txt") {
         Ok(file) => println!("{:?}", file),
         Err(err) => panic!("{}", err),
     }
@@ -674,7 +674,7 @@ Rust中的模式匹配指的是结构上的匹配，最常用有match、while le
     // 2 if let
     // if let 可以让我们只关注我们想要的结果
 
-    if let Ok(file) = std::fs::File::open("rust.txtr") {
+    if let Ok(file) = std::fs::File::open("rust.txt") {
         println!("{:?}", file);
     }
 
