@@ -5,48 +5,39 @@
 
 ```
 
-    // 1 使用for循环遍历集合
-    // 注意：Rust中的for循环本质上是迭代器的语法糖
-    // 迭代器涉及到更复杂的知识点，后续会介绍
+    // 1 match
+    // match 是最长用的模式匹配，主要和枚举搭配使用，以匹配不同的枚举成员
 
-    let v = vec![1, 2, 3, 4, 5];
-
-    for num in v {
-        println!("{}", num);
+    match std::fs::File::open("rust.txt") {
+        Ok(file) => println!("{:?}", file),
+        Err(err) => panic!("{}", err),
     }
 
-    let mut map = std::collections::HashMap::new();
-    map.insert("a", 2);
-    map.insert("b", 2);
-    map.insert("c", 2);
+    // 2 if let
+    // if let 可以让我们只关注我们想要的结果
 
-    for kv_pair in map {
-        println!("{:?}", kv_pair);
+    if let Ok(file) = std::fs::File::open("rust.txt") {
+        println!("{:?}", file);
     }
 
-    // 2 使用 loop 执行无限循环，并使用break终止
+    // 3 while let
+    // 和 if let 类似，只处理正确的结果
 
-    let mut x = 0;
-
-    loop {
-        println!("{:?}", x);
-
-        if x == 10 {
-            break;
-        } else {
-            x = x + 1;
-        }
+    while let Ok(file) = std::fs::File::open("rust.txt") {
+        println!("{:?}", file);
     }
 
-    // 3 使用 while 执行条件循环
+    // 4 let
+    // let 本身也是一种模式匹配
+    // 使用 let 匹配元组中的元素
 
-    let mut x = 0;
-    while x < 5 {
-        println!("x is {}", x);
-        x += 1;
-    }
+    let tuple = (42, true, "rust");
 
+    let (x, y, z) = tuple;
 
+    println!("{:?}", x);
+    println!("{:?}", y);
+    println!("{:?}", z);
 ```
 */
 
