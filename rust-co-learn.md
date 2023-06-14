@@ -1,6 +1,6 @@
 # 	文档说明
 
-本文档的行文逻辑：先介绍一些基础知识，然后再层层递进。 原则是尽量不在前面内容中引入比较高阶的知识点。但这样有一个坏处是一个知识点不能一次性讲透，比如函数，我们在模块一中只介绍了它的声明和样式，在模块二才介绍参数参数的生命周期、返回值类型和trait，在模块三还在介绍它和闭包的关系等等。这样的取舍是为了不再前面就引入后面的内容，增加理解难度，但是本质上Rust语言的各种特性都是深度嵌合在一起的。所以在学习时读者可以根据自己的个人习惯学习，你可以尝试自行扩展，一次搞清楚某个知识点的所有情况，也可以先搞明白一部分，后面再不断补充和完善
+本文档的行文逻辑：先介绍一些基础知识，然后再层层递进。原则是尽量不在前面内容中引入比较高阶的知识点。但这样有一个坏处是一个知识点不能一次性讲透，比如函数，我们在模块一中只介绍了它的声明和样式，在模块二才介绍参数参数的生命周期、返回值类型和trait，在模块三还在介绍它和闭包的关系等等。这样的取舍是为了不在前面就引入后面的内容，增加理解难度，但是本质上Rust语言的各种特性都是深度嵌合在一起的。所以在学习时读者可以根据自己的个人习惯学习，你可以尝试自行扩展，一次搞清楚某个知识点的所有情况，也可以先搞明白一部分，后面再不断补充和完善
 
 本文档的知识深度：总体而言，本文档主要是从应用出发介绍Rust的各个知识点，对核心原理没有做过多的深入介绍，希望深入的朋友可以参阅其他资料
 
@@ -8,7 +8,7 @@
 
 # 模块一：初识Rust
 
-## 1 .1 安装Rust
+## 1.1 安装Rust
 
 #### 1.1.1 安装Rust
 
@@ -20,11 +20,11 @@
 
 #### 1.1.2 更新和卸载
 
-```
+```bash
 rustup update # 更新
 ```
 
-```
+```bash
 rustup self uninstall # 卸载
 ```
 
@@ -34,7 +34,7 @@ rustc 是Rust的编译器，如下是一些使用案例：
 
 **查看Rust版本**
 
-```
+```bash
 rustc --version # 查看已安装的Rust的版本
 ```
 
@@ -42,7 +42,7 @@ rustc --version # 查看已安装的Rust的版本
 
 使用rustc来直接编译代码为二进制程序，然后运行，例如：
 
-```
+```bash
 mkdir module-one # 随便创建一个文件夹
 cd module-one # 进入文件夹
 touch main.rs # 随便创建一个.rs结尾的文件
@@ -50,7 +50,7 @@ touch main.rs # 随便创建一个.rs结尾的文件
 
 rust-co-learn/module-one/main.rs
 
-```
+```rust
 // 写一个简单的main函数
 fn main() {
     println!("Hello Rust")
@@ -59,7 +59,7 @@ fn main() {
 
 **编译和运行**
 
-```
+```bash
 rustc main.rs
 ls # 列出当前目录下的所有文件
 main    main.rs # `main`为编译后的可执行程序
@@ -77,7 +77,7 @@ Hello Rust # 输出结果
 
 以下是一个例子：
 
-```
+```bash
 ➜  module-one git:(main) ✗ cargo new hello_rust --lib # 创建一个 library crate
      Created library `hello_rust` package
 ➜  module-one git:(main) ✗ cargo new hello_cargo --bin # 创建一个 binary crate
@@ -102,7 +102,7 @@ Hello, world!
 
 ### 1.3.1 变量和可变性
 
-```
+```rust
  // 1 常量
     // 使用 const 声明; 常量名称使用大写字母; 显式标注类型
 
@@ -158,7 +158,7 @@ Rust是强类型语言，每个值都有确切的类型
 
 #### 标量类型
 
-```
+```rust
  // 1 整数类型
 
     // Rust 中整数类型分为有符号和无符号类型；长度分为8位，16位，32位，64位，128位
@@ -196,7 +196,7 @@ Rust是强类型语言，每个值都有确切的类型
 
 Rust中的复合类型主要有元组和数组
 
-```
+```rust
  // 1 元组
     // Rust中的元组可以将各种类型组合起来
     let types = (42, "Rust", true);
@@ -232,11 +232,11 @@ Rust中的复合类型主要有元组和数组
 
 #### 字符串
 
-Rust中的字符串比较复杂，有多种形式，适用于不同的场景。核心是需要掌握&str和String
+Rust 中的字符串比较复杂，有多种形式，适用于不同的场景。核心是需要掌握 `&str` 和 `String`
 
-Rust在编译代码时需要在编译期就能够确定类型的大小，而字符串str本身是动态大小的，因而日常中我们更多使用的是字符串的引用&str和String
+Rust 在编译代码时需要在编译期就能够确定类型的大小，而字符串 str 本身是动态大小的，因而日常中我们更多使用的是字符串的引用 `&str` 和 `String`
 
-```
+```rust
     // 1 &str：字符串字面量的引用
     // 字符串字面量实际上存放在程序的只读数据段中，在程序运行时会被加载到内存中读取
     let s = "Hello Rust";
@@ -283,11 +283,13 @@ Rust在编译代码时需要在编译期就能够确定类型的大小，而字�
 2. [一些字符串练习的小例子](https://github.com/rust-lang-cn/rustlings-cn/tree/main/exercises/strings)
 3. [官方文档中关于切片的更多内容](https://rustwiki.org/zh-CN/book/ch04-03-slices.html)
 
+
+
 #### 引用
 
-Rust中的引用类型是一等公民，并且和借用指同一个概念。从可变性上可以分为可变引用和不可变引用
+Rust 中的引用类型是一等公民，并且和借用指同一个概念。从可变性上可以分为可变引用和不可变引用
 
-```
+```rust
     // 1 不可变借用
     let num = 42;
     let immutable_s = &num;
@@ -318,11 +320,13 @@ Rust中的引用类型是一等公民，并且和借用指同一个概念。从�
 
 2.[官方文档中对引用的更多介绍](https://rustwiki.org/zh-CN/book/ch04-02-references-and-borrowing.html)
 
+
+
 #### 集合
 
-两个重要的集合Vec和HashMap，这里的集合指的是它们都聚集了多个同类型的元素
+两个重要的集合 Vec 和 HashMap，这里的集合指的是它们都聚集了多个同类型的元素
 
-```
+```rust
     // 1 Vec
     // Vec是动态大小，相比起数组来说，它更加常用
     // Vec中的元素必须相同
@@ -374,7 +378,7 @@ Rust中的引用类型是一等公民，并且和借用指同一个概念。从�
 
 #### 结构体
 
-```
+```rust
     // 1 结构体
     // Rust中的结构体有三种
 
@@ -419,7 +423,7 @@ Rust中的引用类型是一等公民，并且和借用指同一个概念。从�
 
 #### 枚举
 
-```
+```rust
     // 枚举在形式上和结构体较为相似
     enum Subject {
         Math,
@@ -452,7 +456,7 @@ Rust中的引用类型是一等公民，并且和借用指同一个概念。从�
 
 #### 函数
 
-```
+```rust
     // 1 函数定义
     // 1.1 没有参数和返回值的函数
     fn foo() {
@@ -501,7 +505,7 @@ Rust中的引用类型是一等公民，并且和借用指同一个概念。从�
 
 #### 闭包
 
-```
+```rust
     // 1 闭包定义
 
     // 闭包可以捕获环境变量,并且根据其对环境变量的操作可以分为以下三类
@@ -537,7 +541,7 @@ Rust中的引用类型是一等公民，并且和借用指同一个概念。从�
 
 Rust语言支持泛型编程，在实际操作中会大量涉及到泛型。泛型提供了抽象能力，让代码复用性更强。泛型一般和其它数据结构结合使用
 
-```
+```rust
     // 1 泛型参数的表示
 
     // 泛型参数一般用大写字母`T`表示,多个泛型参数可以使用多个大写字母
@@ -615,7 +619,7 @@ Rust程序在书写上并没有太复杂的结构，循环和模式匹配基本�
 
 Rust有三种循环结构for循环，loop和while
 
-```
+```rust
     // 1 使用for循环遍历集合
     // 注意：Rust中的for循环本质上是迭代器的语法糖，这个我们后面还会再介绍
     // 迭代器涉及到更复杂的知识点，后续会介绍
@@ -662,7 +666,7 @@ Rust有三种循环结构for循环，loop和while
 
 Rust中的模式匹配指的是结构上的匹配，最常用有match、while let 、let 、if let 
 
-```
+```rust
     // 1 match
     // match 是最长用的模式匹配，主要和枚举搭配使用，以匹配不同的枚举成员
 
@@ -702,7 +706,7 @@ Rust中的模式匹配指的是结构上的匹配，最常用有match、while le
 
 Rust中的注释主要包括文档注释，多行注释和单行注释
 
-```
+```rust
   /// 1. 文档注释,一般写在当前文件的最顶端
 
   fn main() {
@@ -768,7 +772,7 @@ Rust是无GC（garbage collection）的语言，对于堆内存的管理主要�
 | 指针类型 | 引用和裸指针、函数指针等         |
 | ...      | ...                              |
 
-```
+```rust
     // 1 所有权与基本类型
 
     // 下面的每个值都只有一个所有者
@@ -846,7 +850,7 @@ Rust是一门静态类型语言，这意味着所有变量在编译期必须是�
 | trait object | trait object 的大小只有在运行时才能确定（可以先不用了解，关于trait的内容后面会继续讲解） |
 | ...          | ...                                                          |
 
-```
+```rust
     // 1 所有权与字符串
     
     // 我们在前面介绍过，字符串可以存放在程序的只读数据段中或者堆上
@@ -914,7 +918,7 @@ Rust是一门静态类型语言，这意味着所有变量在编译期必须是�
 
 所有权规则更像是对资源的独占，在实际场景中，你可能希望多个角色共享访问某个动态资源。Rust提供了两个容器类型Rc<T>和Arc<T>，可以让你同时让多个变量拥有动态数据的所有权
 
-```
+```rust
     // 1 独占访问资源
 
     let mut dynamic_source = String::from("content");
@@ -1000,7 +1004,7 @@ Rust是一门静态类型语言，这意味着所有变量在编译期必须是�
 
 但对于没有所有权的变量也就是引用（借用），比较麻烦，但也主要是在函数参数传递的过程中
 
-```
+```rust
     // 1 有所有权的变量和没有所有权的变量
 
     // 有所有权
@@ -1169,7 +1173,7 @@ Rust中的trait一方面约定类型的共同行为，但另一方面也经常�
 
 Rust中的trait非常强大，它几乎和所有类型相关，你可以通过标准库中的大量定义好的trait来学习类型有哪些方法（可以执行哪些行为），同时，也可以自定义triat，粘合不同的类型，构建自己的项目
 
-```
+```rust
     // 1 trait类型
 
     // 1.1 空trait
@@ -1290,7 +1294,7 @@ Rust中的trait非常强大，它几乎和所有类型相关，你可以通过�
 
 trait约定了类型的共同行为，这些类型既包括自定义类型，也包括Rust标准库中的类型。我们结下来会介绍一些常用的trait
 
-```
+```rust
     // 1 类型转换trait：From和Into
     // 实现了上述trait的类型可以相互转换,实际上，只需要实现From trait即可，这意味着只要实现了From trait，就可以使用Into trait
 
@@ -1366,7 +1370,7 @@ trait约定了类型的共同行为，这些类型既包括自定义类型，也
 
 我们已经深入的介绍了所有权规则：它是Rust实现内存管理的杀手锏之一。trait作为Rust中链接类型大厦的重要环节，和类型的所有权也有很多重要的联系
 
-```
+```rust
     // 1 Copy trait 和 Clone trait
 
     // 之前我们介绍了所有的固定尺寸类型，当把一个变量赋值给另一个变量时，会发生值的复制
@@ -1445,7 +1449,7 @@ trait约定了类型的共同行为，这些类型既包括自定义类型，也
 
 之前我们介绍过，函数参数可以使用trait作为约束
 
-```
+```rust
     // 1 trait object
 
     // trait object 用在当你想返回一个实现了某个trait的类型
@@ -1502,7 +1506,7 @@ trait 在Rust中涵盖的内容非常多，它不光为一些常见的类型定�
 
 ### 3.1.1 trait与闭包
 
-```
+```rust
     // 1. 回顾三种类型的闭包
     // 前面我们介绍过，闭包有三种类型：未捕获环境变量，捕获环境变量不修改，捕获环境变量并修改
 
@@ -1605,7 +1609,7 @@ trait 在Rust中涵盖的内容非常多，它不光为一些常见的类型定�
 
 Rust提供了迭代器trait,可以实现遍历功能
 
-```
+```rust
     // 1. for 循环与迭代器
 
     // 在rust中，for循环实际上的迭代器的语法糖
@@ -1676,7 +1680,7 @@ Rust提供了迭代器trait,可以实现遍历功能
 
 ### 3.1.3 trait与智能指针
 
-```
+```rust
     // 在展开Rust的智能指针之前，我们先区分一下Rust中的指针、引用和裸指针
 
     // 1 指针、引用和智能指针
@@ -1878,7 +1882,7 @@ Box可以将内存强制分配到堆上，并且它也是智能指针，可以�
 
 在编译期，我们需要使用mut显式声明变量的可变性。在运行时，Rust提供了可变容器Cell和RefCell允许修改不可变变量（这个过程实际上是通过原生指针来完成的）
 
-```
+```rust
     // 1.编译期：通过 mut 显式声明变量的可变性，也叫外部可变性
     use std::cell::Cell;
     let can_not_change = "rust";
@@ -1939,7 +1943,7 @@ Box可以将内存强制分配到堆上，并且它也是智能指针，可以�
 
 2 作为一个类型参数的标记，用于告诉 Rust 编译器某些重要信息，例如，当需要实现 `Drop` trait 时，但是类型不实际包含任何需要释放的资源，可以使用 `PhantomData` 来占据一个虚拟的位置，这样以确保编译器不会优化掉的 `Drop` 实现
 
-```
+```rust
 use std::marker::PhantomData;
 
 struct MyType<T> {
@@ -1965,7 +1969,7 @@ fn main() {
 1. 当异步代码在运行时可能会移动或释放被引用的值时，比如 Future 或 async 闭包
 2. 当使用 `unsafe` 代码时，可能会通过裸指针将引用类型转换为可变引用类型，从而破坏编译器对引用类型的保护
 
-```
+```rust
     // 2 特殊类型：Pin<T>
 
     use std::pin::Pin;
@@ -2010,7 +2014,7 @@ Rust整体的错误处理机制有一个层级，随着错误的`严重程度`�
 4. 断言用于防御 
 5. Panic恐慌 
 
-```
+```rust
  // 1 类型系统保证函数契约
     fn sum(a: i32, b: i32) -> i32 {
         a + b
@@ -2124,7 +2128,7 @@ Rust工程管理非常友好，可以轻松管理复杂庞大的工程项目
 
 可以使用`Cargo`来创建
 
-```
+```bash
  cargo new c1 --lib // 创建lib package
  cargo new c2 --bin // 创建binary package，默认创建binary package
 ```
@@ -2137,7 +2141,7 @@ Rust工程管理非常友好，可以轻松管理复杂庞大的工程项目
 
 工作空间用于组织多个crate，本文档的代码组织结构就是使用workspace组织了多个lib crate
 
-```
+```bash
 [workspace]
 members = ['module-one','module-two','module-three','module-four','module-five','module-six']
 ```
@@ -2154,7 +2158,7 @@ members = ['module-one','module-two','module-three','module-four','module-five',
 
 单元测试主要对局部模块内的代码进行测试。测试代码放在测试模块中
 
-```
+```rust
 use std::fs::File;
 use std::io::Error;
 
@@ -2264,7 +2268,7 @@ mod tests {
 
 文档测试也是单元测试，只不过不把测试代码写在测试模块中而是写在文档备注中
 
-```
+```rust
 /// ```
 /// fn add(a: i32, b: i32) -> i32 {
 /// a + b
@@ -2284,7 +2288,7 @@ fn add() {}
 
 在lib.rs下创建一个模块，并导出定义的函数
 
-```
+```rust
 pub use my_add::*;
 mod my_add {
 
@@ -2296,7 +2300,7 @@ mod my_add {
 
 新建src同级目录tests，并创建文件add_test.rs,并在其中先引入函数，再编写测试
 
-```
+```rust
 use module_four::add;
 
 #[test]
@@ -2337,7 +2341,7 @@ fn it_adds_two() {
 
 尽管并发编程涉及计算机的物理基础和一些操作系统知识，比较费解。但是在创建上非常简单，你只需要借助编程语言提供好的接口直接创建即可
 
-```
+```rust
 // main函数是主线程
 fn main() {
     // 创建线程
@@ -2366,7 +2370,7 @@ fn main() {
 
 并发编程除了在原理理解上比较难之外，另一个难点是异步间共享数据。一般情况下，线程间共享数据主要有两种方式，共享内存和消息传递，其中共享内存还可以分为无锁共享和有锁共享。在Rust中，你可以通过通道（channel）在线程间发送数据，还可以通过锁来独占访问数据，也可以通过直接操作原子类型，实现无锁共享，下面是几个例子
 
-```
+```rust
 // 1 通过 channel 共享数据
 
     use std::sync::mpsc;
@@ -2511,7 +2515,7 @@ Rust中提供了一个Future trait，并在future的基础上提供 async/await�
 
 尽管Rust异步编程原理理解比较困难，但是在实际使用中它非常简单，下面是一个案例
 
-```
+```rust
 use reqwest::{blocking::Client, Error};
 use serde::Deserialize;
 use std::vec::Vec;
@@ -2601,7 +2605,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 如下是一个声明宏的声明和使用案例
 
-```
+```rust
 // 导入 HashMap，用于存储键值对。
 use std::collections::HashMap;
 // 导入 lazy_static 宏，用于创建静态变量。
@@ -2644,7 +2648,7 @@ fn main() {
 
 声明宏的一大特征是Token的匹配，Token有多种，如下，相当于宏的关键字，在实际代码中，尤其涉及到重复模式时，可以考虑用声明宏来消除样板代码
 
-```
+```bash
 $name:ident：标识符（identifier），如变量名、函数名等。例如：$func_name:ident。
 $e:expr：表达式（expression），如 1 + 2、my_var 等。例如：$my_expression:expr。
 $t:ty：类型（type），如 i32、String、Vec<T> 等。例如：$my_type:ty。
@@ -2674,7 +2678,7 @@ $tt:tt：单个语法树（token tree），可以匹配任何单个 token。例�
 cargo new derive-macro --lib # 创建一个独立的package
 ```
 
-```
+```bash
 # 在Cargo.toml中写入必备的依赖
 [dependencies]
 syn = "1.0"
@@ -2685,7 +2689,7 @@ proc-macro2 = "1.0"
 proc-macro = true
 ```
 
-```
+```rust
 // 在lib.rs中编写宏代码
 
 // 导入所需库
@@ -2719,13 +2723,13 @@ pub fn simple_debug_derive(input: TokenStream) -> TokenStream {
 }
 ```
 
-```
+```bash
 # 在其它包中引如定义好的包
 [dependencies]
 derive-macro = { path = "../derive-macro" }
 ```
 
-```
+```rust
 // 正常使用即可
 use derive_macro::SimpleDebug;
 
@@ -2771,7 +2775,7 @@ Rust 的设计初衷是提供内存安全性和线程安全性，因此其编译
 
 1. 解引用裸指针
 
-```
+```rust
 rustCopy code
 fn main() {
     let x = 10;
@@ -2787,7 +2791,7 @@ fn main() {
 
 2. 调用不安全的函数或方法：
 
-```
+```rust
 rustCopy code
 unsafe fn unsafe_function() {
     // 执行不安全的操作，如直接操作内存或调用底层系统 API
@@ -2802,7 +2806,7 @@ fn main() {
 
 3. 访问或修改可变静态变量：
 
-```
+```rust
 rustCopy code
 static mut COUNTER: i32 = 0;
 
@@ -2822,7 +2826,7 @@ fn main() {
 
 4. 实现不安全的 trait：
 
-```
+```rust
 rustCopy code
 unsafe trait UnsafeTrait {
     fn unsafe_method(&self);
