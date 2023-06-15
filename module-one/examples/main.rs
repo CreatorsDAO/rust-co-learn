@@ -34,4 +34,21 @@ fn main() {
     println!("{:?}", x);
     println!("{:?}", y);
     println!("{:?}", z);
+
+    // 3 字符串切片
+    // 字符串本质上一个u8序列，支持切片操作
+    let s1 = String::from("Hello Rust"); // String本质是一个指向堆上str的指针
+    let s2 = "Hello Rust"; //&str 很简答，就是一个 str的引用
+
+    // 使用切片的操作过程：可以理解为先通过指针/引用解引用到str本身，然后通过切片操作符号拿一段出来
+    // 但拿出来的片段仍然是str，Rust是静态语言，需要在编译期确定类型的大小，所以还需要引用切片
+    // 整个过程等价于下面
+    let x = &(*s1)[0..5]; //等价于 &x[0..5];
+    let y = &(*s2)[6..10]; //等价于 &s2[6..10]
+
+    let slice1 = &x[0..5];
+    let slice2 = &s2[6..10];
+
+    println!("slice1: {}", slice1); // Hello
+    println!("slice2: {}", slice2); // Rust
 }
