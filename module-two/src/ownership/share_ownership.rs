@@ -1,11 +1,11 @@
-//! 1.3 所有权共享
+//! 1.6 所有权共享
 //!
 
 /**
 
 ```
 
- // 1 独占访问资源
+    // 1 独占访问资源
 
     let mut dynamic_source = String::from("content");
 
@@ -72,7 +72,7 @@
     {
         let source = String::from("hello");
 
-        // 使用Rc包裹资源，让内存泄漏
+        // 使用Rc包裹资源，让堆上资源生命周期更长
         let container = Rc::new(source); // 引用计数 + 1
                                          //
         let role1 = container.clone(); // 引用计数 + 1

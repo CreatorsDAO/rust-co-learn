@@ -1,10 +1,11 @@
-//! 1.2 动态尺寸类型
+//! 1.5 动态大小类型与所有权机制
 //!
 
 /**
 
 ```
     // 1 所有权与字符串
+
     // 我们在前面介绍过，字符串可以存放在程序的只读数据段中或者堆上
     // 一般情况下，字符串字面量存放在只读数据段中的，声明之后很少去修改它
     // 而需要动态变化的字符串我们会把它存放到堆上，并且通过栈内存来管理堆内存
@@ -20,10 +21,9 @@
     println!("{:p}", ptr_owner); // 0x10ac12004
     println!("{:p}", ptr_copy); // 0x10ac12004
 
-    // 1.2 对于存放在堆上的字符串，如果把它的所有者赋值给另一个变量，意味着把堆上所有权就会转移给新的所有者
-    let heap_ptr_old = String::from("Rust"); //存放在堆上
+    let mut _heap_ptr_old = String::from("Rust"); //存放在堆上
 
-    let heap_ptr_new = heap_ptr_old;
+    let heap_ptr_new = _heap_ptr_old;
 
     // println!("old owner{:?}", heap_ptr_old); // 无法再通过 heap_ptr_old 使用值，因为它已经把数据所有权移交给了新的所有者 heap_ptr_new
     println!("old owner{:?}", heap_ptr_new); // heap_ptr_new 可以正常访问到堆上的数据，并且它是唯一的所有者，当它离开作用域时，堆上的数据也会被丢弃
@@ -36,6 +36,8 @@
     }
 
     // println!("{:?}", owner_new); 无法再通过 owner_new 使用值，因为它已经被丢弃
+
+    _heap_ptr_old = String::from("Go"); // 重新赋值，注意原变量不能使用是因为转移所有权后被标注为空了，而不是立即被清除了
 
     // 2 所有权与slice
 
