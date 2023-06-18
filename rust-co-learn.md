@@ -67,6 +67,8 @@ main    main.rs # `main`为编译后的可执行程序
 Hello Rust # 输出结果
 ```
 
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=54378a6f499d2da1477ec96ae625f73b
+
 **扩展资料**
 
 1. [官方文档关于 rustc 的介绍](https://rustwiki.org/zh-CN/book/ch01-02-hello-world.html)
@@ -102,8 +104,10 @@ Hello, world!
 
 ### 1.3.1 变量和可变性
 
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=0ff4573ae85ab2e431064787ffc39ad2
+
 ```rust
- // 1 常量
+    // 1 常量
     // 使用 const 声明; 常量名称使用大写字母; 显式标注类型
 
     const RUST: &str = "rust";
@@ -158,8 +162,10 @@ Rust 是强类型语言，每个值都有确切的类型
 
 #### 标量类型
 
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=ed0a7d320edb758eeb47a355e2c7f41d
+
 ```rust
- // 1 整数类型
+    // 1 整数类型
 
     // Rust 中整数类型分为有符号和无符号类型；长度分为8位，16位，32位，64位，128位
     // 特殊的整数类型: usize 和 isize，与系统架构相关，32位的系统则为32位，64位的系统为64位
@@ -195,9 +201,10 @@ Rust 是强类型语言，每个值都有确切的类型
 #### 复合类型
 
 Rust 中的复合类型主要有元组和数组
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=65bcec8e5a85331fca22686d14f630a2
 
 ```rust
- // 1 元组
+    // 1 元组
     // Rust中的元组可以将各种类型组合起来
     let types = (42, "Rust", true);
 
@@ -235,6 +242,7 @@ Rust 中的复合类型主要有元组和数组
 Rust 中的字符串比较复杂，有多种形式，适用于不同的场景。核心是需要掌握 `&str` 和 `String`
 
 Rust 在编译代码时需要在编译期就能够确定类型的大小，而字符串 str 本身是动态大小的，因而日常中我们更多使用的是字符串的引用 `&str` 和 `String`
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=299d8d6384c97a73a35ba355da47a9fc
 
 ```rust
     // 1 &str：字符串字面量的引用
@@ -248,11 +256,11 @@ Rust 在编译代码时需要在编译期就能够确定类型的大小，而字
     // 2 String：字符串切片的引用
     // String 通过指针指向存放在堆上的字符串
 
-		// 有多种方式可以在堆上创建字符串
-    // let s2 = String::new();         // 空字符串
-    // let s2 = "Hello Rust".to_string();
-    // let s2: String = "Hello Rust".into();
-    // let s2 = String::from("Hello Rust");
+    // 有多种方式可以在堆上创建字符串
+    let s2 = String::new();         // 空字符串
+    let s2 = "Hello Rust".to_string();
+    let s2: String = "Hello Rust".into();
+    let s2 = String::from("Hello Rust");
 
     // 可以使用ptr、len、cap获取String的指针、长度和容量
 
@@ -286,6 +294,7 @@ Rust 在编译代码时需要在编译期就能够确定类型的大小，而字
 #### 引用
 
 Rust 中的引用类型是一等公民，并且和借用指同一个概念。从可变性上可以分为可变引用和不可变引用
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=d44b1a2ebcbc08a09698f5459af9eeff
 
 ```rust
     // 1 不可变借用
@@ -321,6 +330,7 @@ Rust 中的引用类型是一等公民，并且和借用指同一个概念。从
 #### 集合
 
 两个重要的集合 Vec 和 HashMap，这里的集合指的是它们都聚集了多个同类型的元素
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=4356be8f1633cd53956349d00f78f038
 
 ```rust
     // 1 Vec
@@ -374,6 +384,8 @@ Rust 中的引用类型是一等公民，并且和借用指同一个概念。从
 
 #### 结构体
 
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=db0ff78842d77f705061458877b73c9d
+
 ```rust
     // 1 结构体
     // Rust中的结构体有三种
@@ -419,6 +431,8 @@ Rust 中的引用类型是一等公民，并且和借用指同一个概念。从
 
 #### 枚举
 
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=d56f53e8e0bdc6565193cb1283a442ae
+
 ```rust
     // 枚举在形式上和结构体较为相似
     enum Subject {
@@ -432,7 +446,7 @@ Rust 中的引用类型是一等公民，并且和借用指同一个概念。从
 
     //标准库中两个比较重要的枚举 Option和 Result
 
-    // Result 用于一些处操作可能遇到错误的场景，比如打开文件时，如果成功，返回文件，遇到错误时返回一个Error
+    // Result 用于一些操作可能遇到错误的场景，比如打开文件时，如果成功，返回文件，遇到错误时返回一个Error
     use std::fs::File;
 
     let file: Result<File, std::io::Error> = File::open("tmp.txt");
@@ -451,6 +465,8 @@ Rust 中的引用类型是一等公民，并且和借用指同一个概念。从
 1. [官方文档中对于枚举的介绍](https://rustwiki.org/zh-CN/book/ch06-01-defining-an-enum.html)
 
 #### 函数
+
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=c911b65b142fd32da5f4b86333d4f24e
 
 ```rust
     // 1 函数定义
@@ -501,6 +517,8 @@ Rust 中的引用类型是一等公民，并且和借用指同一个概念。从
 
 #### 闭包
 
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=4d5f9adab8504e18ba3da88873b8293b
+
 ```rust
     // 1 闭包定义
 
@@ -536,6 +554,7 @@ Rust 中的引用类型是一等公民，并且和借用指同一个概念。从
 #### 泛型
 
 Rust 语言支持泛型编程，在实际操作中会大量涉及到泛型。泛型提供了抽象能力，让代码复用性更强。泛型一般和其它数据结构结合使用
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=0cda0796578945e9069d8b823df7de58
 
 ```rust
     // 1 泛型参数的表示
@@ -614,6 +633,7 @@ Rust 程序在书写上并没有太复杂的结构，循环和模式匹配基本
 #### 循环
 
 Rust 有三种循环结构 for 循环，loop 和 while
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=f288245cf3a45a448f21ff1a111de2f9
 
 ```rust
     // 1 使用for循环遍历集合
@@ -661,12 +681,13 @@ Rust 有三种循环结构 for 循环，loop 和 while
 #### 模式匹配
 
 Rust 中的模式匹配指的是结构上的匹配，最常用有 match、while let 、let 、if let
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=a37a71bbf1a3b5a1bbcdf811fccd4169
 
 ```rust
     // 1 match
     // match 是最长用的模式匹配，主要和枚举搭配使用，以匹配不同的枚举成员
 
-    match std::fs::File::open("rust.txtr") {
+    match std::fs::File::open("rust.txt") {
         Ok(file) => println!("{:?}", file),
         Err(err) => panic!("{}", err),
     }
@@ -674,7 +695,7 @@ Rust 中的模式匹配指的是结构上的匹配，最常用有 match、while 
     // 2 if let
     // if let 可以让我们只关注我们想要的结果
 
-    if let Ok(file) = std::fs::File::open("rust.txtr") {
+    if let Ok(file) = std::fs::File::open("rust.txt") {
         println!("{:?}", file);
     }
 
@@ -701,6 +722,7 @@ Rust 中的模式匹配指的是结构上的匹配，最常用有 match、while 
 ### 1.3.5 注释
 
 Rust 中的注释主要包括文档注释，多行注释和单行注释
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=e36e63df4897a68f81ed32fc1b67dbf1
 
 ```rust
   /// 1. 文档注释,一般写在当前文件的最顶端
@@ -774,7 +796,7 @@ int main(){
 }
 ```
 
-弊端：开发者心智负担重，未及时释放内存可能导致内存奔溃，未正确释放内存可能导致悬垂指针问题，好处：程序性能优越
+弊端：开发者心智负担重，未及时释放内存可能导致内存崩溃，未正确释放内存可能导致悬垂指针问题，好处：程序性能优越
 
 自动管理内存（使用垃圾回收机制），代表语言：Java / GO，如下是一段 Java 代码
 
@@ -801,7 +823,8 @@ public class Main {
 
 弊端：程序性能低、内存开销大、世界暂停，好处是开发者心智负担小，轻松易上手
 
-其它内存管理方案（比如 Rust 所有权机制与检查规则管理），代表语言：Rust，如下是 Rust 代码
+其它内存管理方案（比如 Rust 所有权机制与借用检查规则管理），代表语言：Rust，如下是 Rust 代码
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=b4d115d666ec0813bfea1ccc0428fe38
 
 ```rust
 fn main() {
@@ -857,6 +880,7 @@ Rust 是无 GC（garbage collection）的语言，对于堆内存的管理主要
 | ...      | ...                              |
 
 固定大小类型：一旦声明：地址和大小不可再变
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=f2460abf86f684ee48a05dff4e7abf7f
 
 ```
 fn main() {
@@ -903,6 +927,7 @@ fn main() {
 ```
 
 其它的固定大小类型实例
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=f924550a9397be9d61f7fa0a9cb4df6b
 
 ```
 use std::mem::size_of;
@@ -951,6 +976,7 @@ fn foo() {
 ```
 
 所有权规则在固定大小类型代码中的体现：将一个变量作为值赋值给另一个变量时，发生值拷贝行为
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=94e4bbdf615b0733ddbda3d8bc55baef
 
 ```
 
@@ -1055,6 +1081,7 @@ Rust 是一门静态类型语言，这意味着所有变量在编译期必须是
 | ...          | ...                                                                                        |
 
 动态类型大小，声明后再次修改时，大小和地址可能会动态变化
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=52713345438ea0c329a8bec48af20ab2
 
 ```
 fn main() {
@@ -1120,6 +1147,7 @@ fn main() {
 ```
 
 所有权规则在动态大小类型中的体现：将一个变量作为值赋值给另一个变量时，发生所有权转移行为
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=f9286943a38c83b4aec5be6e23dd371b
 
 ```
     // 1 所有权与字符串
@@ -1188,6 +1216,7 @@ fn main() {
 ### 2.1.3 所有权共享
 
 所有权规则更像是对资源的独占，在实际场景中，你可能希望多个角色共享访问某个动态资源。Rust 提供了两个容器类型 Rc<T>和 Arc<T>，可以让你同时让多个变量拥有动态数据的所有权
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=9dfcc3a0bc4caeb870911290372b3ced
 
 ```rust
     // 1 独占访问资源
@@ -1272,6 +1301,7 @@ fn main() {
 ### 2.2.1 借用与引用以及借用检查规则
 
 引用和借用在Rust中不同视角下的同一个概念。Rust中任何类型的变量都遵从所有权规则，但值为引用类型的变量还有遵从借用检查规则
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=51f669ee697d8edb494552fd4438b432
 
 ```rust
 fn main() {
@@ -1305,6 +1335,7 @@ fn main() {
 根据是否拥有数据（值），Rust 中的变量可以分为拥有数据的变量和没有数据变量，也就是说它对应的值是一个引用
 
 当变量值为数据时，一般Rust可以根据上下文推断这个变量在哪里声明的以及在哪里离开作用域的，然后它会通过所有权规则释放变量所对应的内存，当一个变量的值是来自于另一个值的引用时，Rust会通过借用检查器来确保所有的引用都是有效的
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=19c3e8b7fa76b97d79152207d75c46d9
 
 ```rust
     //1 变量的生命周期 : 从声明开始，到离开作用域结束
@@ -1327,6 +1358,7 @@ fn main() {
 ### 2.2.3 生命周期参数
 
 当一个变量的值是来自于另一个值的引用时，有时候编译器并不能准确推断这个引用的有效性
+rust playground 在线编译运行: https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=0157e849d29356317fa09e1635c8742d
 
 ```
     // 可以推断引用的有效性
