@@ -1,116 +1,117 @@
-//! 3.4 trait 对象
+//! 3.2 trait object
 //!
 //!
 
 /**
 
 ```
-    // 1 trait类型
+    // 1 泛型与trait bound
 
-    // 1.1 空trait
-
-    trait A {}
-
-    // 1.2 有方法的trait
-
-    trait B {
-        fn method1(&self);
-        fn method2(&self);
-
-        // ...
+    trait Animal {
+        fn make_sound(&self) -> &'static str;
     }
 
-    // 1.3 有关联类型的trait
+    trait Food {}
 
-    trait C {
-        type Type;
+    struct Dog;
 
-        fn method1(&self) -> Self::Type;
-    }
-
-    // 1.4 有默认实现的trait
-
-    trait D {
-        // 这个方法是默认实现
-        fn method1(&self) {
-            println!("method1");
-        }
-        fn method2(&self);
-    }
-
-    // 2 如何实现 trait
-
-    // 2.1 手动实现
-
-    struct Book;
-
-    trait Read {
-        fn read(&self);
-    }
-
-    // 使用impl语法
-    impl Read for Book {
-        fn read(&self) {
-            println!("read book");
+    impl Animal for Dog {
+        fn make_sound(&self) -> &'static str {
+            "Woof!"
         }
     }
 
-    // 注意和为类型实现方法做区别
+    struct Cat;
 
-    impl Book {
-        fn read(&self) {
-            println!("read book");
+    impl Animal for Cat {
+        fn make_sound(&self) -> &'static str {
+            "Meow!"
         }
     }
 
-    // 2.2 使用宏实现
-    // 标准库和第三方库中一些trait可以通过派生宏来实现
+    struct Pig;
 
-    #[derive(Default, Clone)]
-    struct Student {
-        name: String,
-        age: u32,
-    }
-
-    // 可以直接调用trait提供的方法
-    let s = Student::default();
-    let s1 = s.clone();
-
-    // 3 trait约束
-
-    // 3.1 trait继承，如下要求类型必须先实现 Clone和Default trait才能是实现 S trait
-    trait S: Clone + Default {
-        fn get_age(&self) -> u32;
-    }
-
-    impl S for Student {
-        fn get_age(&self) -> u32 {
-            self.age
+    impl Animal for Pig {
+        fn make_sound(&self) -> &'static str {
+            "Woof!"
         }
     }
 
-    // trait 作为函数参数的约束：只有实现了S trait的泛型才能作为下列函数的参数
+    impl Food for Pig {}
 
-    fn person_age<T: S>(s: T) -> u32 {
-        s.get_age()
+    // trait 作为约束时有三种写法
+
+    fn get_weight<T: Animal + Food>(x: T) {
+
+        // do sth
     }
 
-    struct Teacher {
-        name: String,
-        age: u32,
+    fn get_weight1(x: impl Animal + Food) {
+
+        // do sth
     }
 
-    let t = Teacher {
-        name: "teacher".to_string(),
-        age: 30,
-    };
+    fn get_weight2<T>(x: T)
+    where
+        T: Animal + Food,
+    {
+        // do sth
+    }
 
-    // person_age(t); // t没有实现S trait，所以不能作为参数
-    person_age(s); // 可以调用
+    let d = Dog;
+    let c = Cat;
+    let p = Pig;
+
+    // get_weight(d);
+    // get_weight(c);
+    get_weight(p);
+
+    // 2 trait object
+    // trait 对象通过指针来创建，如 & 或 Box<T>(一种智能指针，可以把数据存放到堆上)：&dyn Trait or Box<dyn Trait>
+    // Box是Rust中唯一可以把数据强制分配到堆上的类型
+
+    // 静态分发:在编译期通过具体类型实例直接调用方法,编译期单态化
+
+    fn animal_make_sound<T: Animal>(a: T) {
+        a.make_sound();
+    }
+    animal_make_sound(d);
+    animal_make_sound(c);
+
+    // 动态分发：在运行时先判断类型再查找类型对应方法
+    // 特别说明，使用 trait object 会带来运行时开销
+
+    fn animal_make_sound2(animals: Vec<&dyn Animal>) {
+        for animal in animals {
+            animal.make_sound();
+        }
+    }
+
+    let d = Dog;
+    let c = Cat;
+
+    let animals: Vec<&dyn Animal> = vec![&d, &c];
+
+    animal_make_sound2(animals);
+
+    // 3 trait object 安全
+    // trait中方法返回值类型不为 Self
+    // trait中方法没有任何泛型类型参数
+
+    pub trait X {
+        fn method(&self) -> Self;
+    }
+
+    pub trait Y {
+        fn print<T: std::fmt::Display>(&self, t: T);
+    }
+
+    // fn use_trait_object(t: &dyn X) {}
+    // fn use_trait_object2(t: &dyn Y) {}
 
 ```
 */
 
-pub fn trait_intro() {
+pub fn trait_object() {
     println!("");
 }

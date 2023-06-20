@@ -1366,8 +1366,15 @@ fn main() {
 
     // 无法推断引用的有效性
     // fn bar(x: &Foo, y: &Foo) -> &Foo {
-    //     x
+    //     let f3 = Foo {
+    //         x: 32,
+    //         y: (32, true),
+    //         z: String::from("rust"),
+    //     };
+    //     &f3
     // }
+
+    // let new = bar(&f1, &f2);
 
     // 通过生命周期参数显示指定参数的生命周期
 
@@ -1427,16 +1434,14 @@ fn main() {
 
 ## 2.3 trait 与 trait object
 
-### 2.3.1 trait 简介
+### 2.3.1 trait 
 
-Rust 中的 trait 是一种定义行为的方式，它类似于其他语言中的接口或抽象类。一个 trait 定义了一组方法的签名，这些方法可以在其他类型中实现，并允许这些类型表现出特定的行为
+在Rust编程语言中，`trait` 是一种定义在编译器级别的接口机制，可以定义在某种数据类型上的行为。也可以将 `trait` 理解为一种类型层级的协议，协议约定了类型共同的行为，并通过方法来暴露这些协议接口
 
-Rust 中的 trait 一方面约定类型的共同行为，但另一方面也经常以是否实现了某个 trait 作为对类型的约束
+**trait的声明及种类**
 
-Rust 中的 trait 非常强大，它几乎和所有类型相关，你可以通过标准库中的大量定义好的 trait 来学习类型有哪些方法（可以执行哪些行为），同时，也可以自定义 triat，粘合不同的类型，构建自己的项目
-
-```rust
-    // 1 trait类型
+```
+ // 1 trait 种类
 
     // 1.1 空trait
 
@@ -1445,7 +1450,7 @@ Rust 中的 trait 非常强大，它几乎和所有类型相关，你可以通�
     // 1.2 有方法的trait
 
     trait B {
-        fn method1(&self);
+        fn method(&self);
         fn method2(&self);
 
         // ...
@@ -1454,9 +1459,9 @@ Rust 中的 trait 非常强大，它几乎和所有类型相关，你可以通�
     // 1.3 有关联类型的trait
 
     trait C {
-        type Type;
+        type T;
 
-        fn method1(&self) -> Self::Type;
+        fn method1(&self) -> Self::T;
     }
 
     // 1.4 有默认实现的trait
@@ -1466,33 +1471,104 @@ Rust 中的 trait 非常强大，它几乎和所有类型相关，你可以通�
         fn method1(&self) {
             println!("method1");
         }
-        fn method2(&self);
+        fn consume_method(&mut self);
     }
 
+    // 1.5 有自由方法（函数）的trait
+
+    trait E {
+        // 这个方法是默认实现
+        fn method1(&self) {
+            println!("method1");
+        }
+        // 这个方法需要手动实现
+        fn method2(&self);
+
+        // 这个方法是默认实现
+        fn method3() {
+            println!("freedom method")
+        }
+
+        // 这个方法需要手动实现
+        fn method4(a: &str) -> &str;
+    }
+
+    // 1.6 trait继承
+
+    trait F: E {
+        // method
+    }
+```
+
+**trait的实现**
+
+trait一般和类型结合使用，独立trait并没有太大的意义
+
+```rust
     // 2 如何实现 trait
 
     // 2.1 手动实现
 
-    struct Book;
+    struct Teacher;
 
-    trait Read {
-        fn read(&self);
-    }
-
-    // 使用impl语法
-    impl Read for Book {
-        fn read(&self) {
-            println!("read book");
+    impl Teacher {
+        fn method1() {
+            print!("这是类型的关联方法");
         }
     }
 
-    // 注意和为类型实现方法做区别
+    Teacher::method1(); // 关联方法调用
 
-    impl Book {
-        fn read(&self) {
-            println!("read book");
+    impl A for Teacher {}
+
+    impl B for Teacher {
+        fn method(&self) {
+            print!("")
+        }
+        fn method2(&self) {
+            print!("")
         }
     }
+
+    let mut t = Teacher;
+    t.method(); // 方法通过实例调用
+    t.method();
+
+    impl C for Teacher {
+        type T = Teacher;
+
+        fn method1(&self) -> Self::T {
+            let t = String::from("Teacher");
+
+            // t
+            Teacher
+        }
+    }
+
+    impl D for Teacher {
+        fn consume_method(&mut self) {
+            // let x = self;
+            // let y = self;
+        }
+    }
+
+    t.consume_method();
+    t.consume_method();
+
+    impl E for Teacher {
+        fn method2(&self) {}
+        fn method4(a: &str) -> &str {
+            "Rust"
+        }
+    }
+
+    Teacher::method4("Go"); // 对trait中自由方法的调用同调用类型的关联方法
+
+    struct Professor;
+
+    // impl F for Professor {}
+
+    impl F for Teacher {}
 
     // 2.2 使用宏实现
     // 标准库和第三方库中一些trait可以通过派生宏来实现
@@ -1503,132 +1579,204 @@ Rust 中的 trait 非常强大，它几乎和所有类型相关，你可以通�
         age: u32,
     }
 
+    // 调用方法
+
     // 可以直接调用trait提供的方法
     let s = Student::default();
     let s1 = s.clone();
-
-    // 3 trait约束
-
-    // 3.1 trait继承，如下要求类型必须先实现 Clone和Default trait才能是实现 S trait
-    trait S: Clone + Default {
-        fn get_age(&self) -> u32;
-    }
-
-    impl S for Student {
-        fn get_age(&self) -> u32 {
-            self.age
-        }
-    }
-
-    // trait 作为函数参数的约束：只有实现了S trait的泛型才能作为下列函数的参数
-
-    fn person_age<T: S>(s: T) -> u32 {
-        s.get_age()
-    }
-
-    struct Teacher {
-        name: String,
-        age: u32,
-    }
-
-    let t = Teacher {
-        name: "teacher".to_string(),
-        age: 30,
-    };
-
-    // person_age(t); // t没有实现S trait，所以不能作为参数
-    person_age(s); // 可以调用
 ```
 
 标准库中预导入了很多 trait，可以直接在文件中使用而不用` use`导入，你可以大概看一下下列表格，消除对 trait 的陌生感
 
 ![image-20230302004216125](https://github.com/CreatorsDAO/rust-co-learn/blob/main/images/prelude_traits.png)
 
-如下是不同场景下经常使用的 trait
-
-![img](https://github.com/CreatorsDAO/rust-co-learn/blob/main/images/traits_fetures.png)
-
 **扩展资料**
 
 1. [官方文档中关于 trait 的介绍](https://rustwiki.org/zh-CN/book/ch10-01-syntax.html)
 
-### 2.3.2 trait 与类型转换
+### 2.3.2 trait object 
 
-trait 约定了类型的共同行为，这些类型既包括自定义类型，也包括 Rust 标准库中的类型。我们结下来会介绍一些常用的 trait
+trait既可以作为另一个trait的约束，也可以作为泛型参数的约束，体现的是它的约束能力。trait object 提供了运行时动态分发的能力
 
 ```rust
-    // 1 类型转换trait：From和Into
-    // 实现了上述trait的类型可以相互转换,实际上，只需要实现From trait即可，这意味着只要实现了From trait，就可以使用Into trait
+  // 1 泛型与trait bound
 
-    // 1.1 From
-
-    use std::convert::From;
-
-    #[derive(Debug)]
-    struct Number {
-        value: i32,
+    trait Animal {
+        fn make_sound(&self) -> &'static str;
     }
 
-    // 为自定义类型实现From trait，注意这里Trait带了一个类型参数i32，特指将i32转换为Number
+    trait Food {}
 
-    impl From<i32> for Number {
-        fn from(item: i32) -> Self {
-            Number { value: item }
+    struct Dog;
+
+    impl Animal for Dog {
+        fn make_sound(&self) -> &'static str {
+            "Woof!"
         }
     }
 
-    // 使用From trait中的from方法将i32转换为Number
-    let num = Number::from(30);
-    println!("My number is {:?}", num);
+    struct Cat;
 
-    // 1.2 Into
-
-    let int = 5;
-    // 使用Into trait中的from方法将i32转换为Number
-    let num: i32 = int.into();
-    println!("My number is {:?}", num);
-
-    // 为自定义类型实现Into trait，注意这里Trait带了一个类型参数Number，特指将Number转换为i32
-    impl From<Number> for i32 {
-        fn from(item: Number) -> Self {
-            item.value
+    impl Animal for Cat {
+        fn make_sound(&self) -> &'static str {
+            "Meow!"
         }
     }
 
-    let num = Number { value: 30 };
+    struct Pig;
 
-    // 使用Into trait中的into方法将Number转换为i32
-    let int1: i32 = num.into();
-    let num = Number { value: 30 };
-    let int2: i32 = i32::from(num);
-
-    // 与此相似的trait还有 TryFrom 和 TryInto
-    // 在实际中，TryFrom 和 TryInto 用的比较多，因为它们可以处理错误，但是实现逻辑和 From 和 Into 一样
-
-    // 2 AsRef 和 AsMut
-
-    // 通过AsMut获取可变引用:注意这里获取结构体成员的可变引用
-    impl AsMut<i32> for Number {
-        fn as_mut(&mut self) -> &mut i32 {
-            &mut self.value
+    impl Animal for Pig {
+        fn make_sound(&self) -> &'static str {
+            "Woof!"
         }
     }
 
-    let mut num = Number { value: 30 };
+    impl Food for Pig {}
 
-    let ref_num = num.as_mut();
+    // trait 作为约束时有三种写法
 
-    // 通过AsRef获取变量的不可变引用:注意这里获取结构体成员的不可变引用
-    impl AsRef<i32> for Number {
-        fn as_ref(&self) -> &i32 {
-            &self.value
+    fn get_weight<T: Animal + Food>(x: T) {
+
+        // do sth
+    }
+
+    fn get_weight1(x: impl Animal + Food) {
+
+        // do sth
+    }
+
+    fn get_weight2<T>(x: T)
+    where
+        T: Animal + Food,
+    {
+        // do sth
+    }
+
+    let d = Dog;
+    let c = Cat;
+    let p = Pig;
+
+    // get_weight(d);
+    // get_weight(c);
+    get_weight(p);
+
+    // 2 trait object
+    // trait 对象通过指针来创建，如 & 或 Box<T>(一种智能指针，可以把数据存放到堆上)：&dyn Trait or Box<dyn Trait>
+    // Box是Rust中唯一可以把数据强制分配到堆上的类型
+
+    // 静态分发:在编译期通过具体类型实例直接调用方法,编译期单态化
+
+    fn animal_make_sound<T: Animal>(a: T) {
+        a.make_sound();
+    }
+    animal_make_sound(d);
+    animal_make_sound(c);
+
+    // 动态分发：在运行时先判断类型再查找类型对应方法
+    // 特别说明，使用 trait object 会带来运行时开销
+
+    fn animal_make_sound2(animals: Vec<&dyn Animal>) {
+        for animal in animals {
+            animal.make_sound();
         }
     }
 
-    // 特别说明：以上代码展示并不一定是最佳实践，只是为了介绍知识点而展示的可能性
+    let d = Dog;
+    let c = Cat;
+
+    let animals: Vec<&dyn Animal> = vec![&d, &c];
+
+    animal_make_sound2(animals);
+
+    // 3 trait object 安全
+    // trait中方法返回值类型不为 Self
+    // trait中方法没有任何泛型类型参数
+
+    pub trait X {
+        fn method(&self) -> Self;
+    }
+
+    pub trait Y {
+        fn print<T: std::fmt::Display>(&self, t: T);
+    }
+
+    // fn use_trait_object(t: &dyn X) {}
+    // fn use_trait_object2(t: &dyn Y) {}
 ```
 
-### 2.3.3 trait 与所有权
+### 2.3.3 trait 定义共有行为
+
+trait 通过方法可以为类型定义一些通用的方法，一个是不用再给类型专门定义，代码更加简化，第二个能够更好的规定类型行为。
+
+```
+ pub struct Book {
+        name: String,
+        price: f64,
+        inventory: u32,
+        author: String,
+    }
+
+    pub struct Cosmetic {
+        name: String,
+        price: f64,
+        inventory: u32,
+    }
+
+    pub trait Record {
+        fn set_price(&mut self, price: f64);
+        fn set_inventory(&mut self, inventory: u32);
+    }
+
+    impl Record for Book {
+        fn set_price(&mut self, price: f64) {
+            self.price = price;
+        }
+
+        fn set_inventory(&mut self, inventory: u32) {
+            self.inventory = inventory;
+        }
+    }
+
+    impl Record for Cosmetic {
+        fn set_price(&mut self, price: f64) {
+            self.price = price;
+        }
+
+        fn set_inventory(&mut self, inventory: u32) {
+            self.inventory = inventory;
+        }
+    }
+
+    let mut book = Book {
+        name: String::from("Book A"),
+        price: 29.99,
+        inventory: 10,
+        author: String::from("Author X"),
+    };
+
+    let mut cosmetic = Cosmetic {
+        name: String::from("Lipstick"),
+        price: 9.99,
+        inventory: 50,
+    };
+
+    book.set_price(39.99);
+    book.set_inventory(5);
+
+    cosmetic.set_price(14.99);
+    cosmetic.set_inventory(20);
+
+    println!(
+        "Book: {} - Price: {} - Inventory: {} - Author: {}",
+        book.name, book.price, book.inventory, book.author
+    );
+    println!(
+        "Cosmetic: {} - Price: {} - Inventory: {}",
+        cosmetic.name, cosmetic.price, cosmetic.inventory
+    );
+```
+
+### 2.3.4 trait 与所有权
 
 我们已经深入的介绍了所有权规则：它是 Rust 实现内存管理的杀手锏之一。trait 作为 Rust 中链接类型大厦的重要环节，和类型的所有权也有很多重要的联系
 
@@ -1707,50 +1855,86 @@ trait 约定了类型的共同行为，这些类型既包括自定义类型，�
     // 但trait系统让所有权机制更加的显式化了，更好理解，也更好使用
 ```
 
-### 2.3.4 trait Object
+### 2.3.5 trait 与类型转换
 
-之前我们介绍过，函数参数可以使用 trait 作为约束
+trait 作为类型之间转换的桥梁时是用的最多的场景之一。这些类型既包括自定义类型，也包括 Rust 标准库中的类型
 
 ```rust
-    // 1 trait object
+ // 1 类型转换trait：From和Into
+    // Into trait 会自动实现
 
-    // trait object 用在当你想返回一个实现了某个trait的类型
-    // 语法：&dyn Trait or Box<dyn Trait> // Box是Rust中唯一可以把数据强制分配到堆上的类型，先不展开，后面会介绍
+    // 1.1 From i32 to Number
 
-    trait Animal {
-        fn speak(&self) -> &'static str;
+    use std::convert::From;
+
+    #[derive(Debug)]
+    struct Number {
+        value: i32,
     }
 
-    struct Dog;
-    impl Animal for Dog {
-        fn speak(&self) -> &'static str {
-            "Woof!"
+    // 为自定义类型实现From trait，注意这里Trait带了一个类型参数i32，特指将i32转换为Number
+
+    impl From<i32> for Number {
+        fn from(item: i32) -> Self {
+            Number { value: item }
         }
     }
 
-    struct Cat;
-    impl Animal for Cat {
-        fn speak(&self) -> &'static str {
-            "Meow!"
+    // 使用From trait中的from方法将i32转换为Number
+    let num = Number::from(30);
+    println!("My number is {:?}", num);
+
+    let n: Number = 32.into();
+
+    // 1.2 From Number to i32
+
+    // 为自定义类型实现Into trait，注意这里Trait带了一个类型参数Number，特指将Number转换为i32
+    impl From<Number> for i32 {
+        fn from(item: Number) -> Self {
+            item.value
         }
     }
 
-    fn animal_speak(animal: &dyn Animal) {
-        println!("{}", animal.speak());
+    let num = i32::from(32);
+    let x = Number { value: 10 };
+
+    // 使用Into trait中的into方法将Number转换为i32
+    let num: i32 = x.into();
+    println!("number is {:?}", num);
+
+    // 与此相似的trait还有 TryFrom 和 TryInto
+    // 在实际中，TryFrom 和 TryInto 用的比较多，因为它们可以处理错误，但是实现逻辑和 From 和 Into 一样
+
+    // 2 AsRef 和 AsMut
+
+    // 通过AsMut获取可变引用:注意这里获取结构体成员的可变引用
+    impl AsMut<i32> for Number {
+        fn as_mut(&mut self) -> &mut i32 {
+            &mut self.value
+        }
     }
 
-    fn main() {
-        let dog = Dog;
-        let cat = Cat;
+    let mut num = Number { value: 30 };
 
-        animal_speak(&dog);
-        animal_speak(&cat);
+    let ref_num = num.as_mut();
+
+    // 通过AsRef获取变量的不可变引用:注意这里获取结构体成员的不可变引用
+    impl AsRef<i32> for Number {
+        fn as_ref(&self) -> &i32 {
+            &self.value
+        }
     }
 
-    // 特别说名，使用 trait 对象 会带来运行时开销
-    // 因为在编译时无法确定具体类型，所以编译器需要在运行时动态地查找并调用正确的方法
-    // 这涉及到虚函数表（vtable）的概念，每个 trait 对象都有一个指向相应 vtable 的指针
+    let num = Number { value: 40 };
+
+    let ref_num: &i32 = num.as_ref();
+
+    // 特别说明：以上代码展示并不一定是最佳实践，只是为了介绍知识点而展示的可能性
 ```
+
+如下是不同场景下经常使用的 trait
+
+![img](https://github.com/CreatorsDAO/rust-co-learn/blob/main/images/traits_fetures.png)
 
 ## 2.4 课后习题
 

@@ -1,13 +1,13 @@
-//! 3.2 trait 与类型转换
+//! 3.5 trait 与类型转换
 //!
 
 /**
 
 ```
-     // 1 类型转换trait：From和Into
-    // 实现了上述trait的类型可以相互转换,实际上，只需要实现From trait即可，这意味着只要实现了From trait，就可以使用Into trait
+    // 1 类型转换trait：From和Into
+    // Into trait 会自动实现
 
-    // 1.1 From
+    // 1.1 From i32 to Number
 
     use std::convert::From;
 
@@ -28,12 +28,9 @@
     let num = Number::from(30);
     println!("My number is {:?}", num);
 
-    // 1.2 Into
+    let n: Number = 32.into();
 
-    let int = 5;
-    // 使用Into trait中的from方法将i32转换为Number
-    let num: i32 = int.into();
-    println!("My number is {:?}", num);
+    // 1.2 From Number to i32
 
     // 为自定义类型实现Into trait，注意这里Trait带了一个类型参数Number，特指将Number转换为i32
     impl From<Number> for i32 {
@@ -42,15 +39,15 @@
         }
     }
 
-    let num = Number { value: 30 };
+    let num = i32::from(32);
+    let x = Number { value: 10 };
 
     // 使用Into trait中的into方法将Number转换为i32
-    let int1: i32 = num.into();
-    let num = Number { value: 30 };
-    let int2: i32 = i32::from(num);
+    let num: i32 = x.into();
+    println!("number is {:?}", num);
 
     // 与此相似的trait还有 TryFrom 和 TryInto
-    // 在实际中，TryFrom 和 TryInto 用的比较多，因为它们可以处理错误，但是实现逻辑和 From 和 Into 是一样
+    // 在实际中，TryFrom 和 TryInto 用的比较多，因为它们可以处理错误，但是实现逻辑和 From 和 Into 一样
 
     // 2 AsRef 和 AsMut
 
@@ -72,11 +69,15 @@
         }
     }
 
+    let num = Number { value: 40 };
+
+    let ref_num: &i32 = num.as_ref();
+
     // 特别说明：以上代码展示并不一定是最佳实践，只是为了介绍知识点而展示的可能性
 
 ```
 */
 
-pub fn trait_intro() {
+pub fn trait_type_convert() {
     println!("");
 }
