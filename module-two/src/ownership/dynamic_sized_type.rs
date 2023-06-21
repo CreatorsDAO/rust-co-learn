@@ -25,8 +25,8 @@
 
     let heap_ptr_new = _heap_ptr_old;
 
-    // println!("old owner{:?}", heap_ptr_old); // 无法再通过 heap_ptr_old 使用值，因为它已经把数据所有权移交给了新的所有者 heap_ptr_new
-    println!("old owner{:?}", heap_ptr_new); // heap_ptr_new 可以正常访问到堆上的数据，并且它是唯一的所有者，当它离开作用域时，堆上的数据也会被丢弃
+    // println!("old owner{:?}", _heap_ptr_old); // 无法再通过 _heap_ptr_old 使用值，因为它已经把数据所有权移交给了新的所有者 heap_ptr_new
+    println!("new owner{:?}", heap_ptr_new); // heap_ptr_new 可以正常访问到堆上的数据，并且它是唯一的所有者，当它离开作用域时，堆上的数据也会被丢弃
 
     {
         let owner_old = String::from("rust");
