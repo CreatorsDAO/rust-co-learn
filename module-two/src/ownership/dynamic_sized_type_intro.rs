@@ -20,7 +20,7 @@
     println!("Size of 'go': {} bytes", size_of_a); // 打印结果：Size of 'go': 2 bytes
     println!("Address of 'go': {:p}", ptr_of_a); // 打印结果：Address of 'go': 0x107e52fdb
 
-    let ptr_of_rust = "rust".as_ptr(); // 访问初试的“rust”
+    let ptr_of_rust = "rust".as_ptr(); // 访问初始的“rust”
     println!("Address of 'rust' after reassignment: {:p}", ptr_of_rust); // 打印结果：Address of 'rust' after reassignment: 0x107e52fa0
 
     // 2 String
