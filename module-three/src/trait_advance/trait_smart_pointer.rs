@@ -150,6 +150,8 @@ impl<T> Deref for MyBox<T> {
 {
     let m = MyBox("rust");
     let ref_my_box = *m; // 实现了 Deref trait的智能指针可以使用 * 直接解引用到内部的值
+    // 等价于下面：deref函数会自动调用
+    let ref_my_box = *(m.deref());
 
     // String是智能指针，它实现了Deref trait，所以可以直接解引用
 

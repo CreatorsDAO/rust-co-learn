@@ -74,7 +74,7 @@ call_fn_mut(c); // 实现了FnMut trait,FnOnce trait
 
 let mut x = String::from("10");
 
-let mut c = || println!("get env var {y:?}", y = x);
+let mut c = || println!("get env var {x:?}", x = String::from("20"));
 
 call_fn_once(c); // 实现了FnOnce trait
 call_fn(c); // 实现了Fn trait，FnMut trait,FnOnce trait,后面两种trait都是通过继承实现的

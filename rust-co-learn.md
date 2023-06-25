@@ -2022,7 +2022,7 @@ call_fn_mut(c); // 实现了FnMut trait,FnOnce trait
 
 let mut x = String::from("10");
 
-let mut c = || println!("get env var {y:?}", y = x);
+let mut c = || println!("get env var {x:?}", x = String::from("20"));
 
 call_fn_once(c); // 实现了FnOnce trait
 call_fn(c); // 实现了Fn trait，FnMut trait,FnOnce trait,后面两种trait都是通过继承实现的
@@ -2276,6 +2276,8 @@ Rust 提供了迭代器 trait,可以实现遍历功能
     {
         let m = MyBox("rust");
         let ref_my_box = *m; // 实现了 Deref trait的智能指针可以使用 * 直接解引用到内部的值
+                           // 等价于下面：deref函数会自动调用
+        let ref_my_box = *(m.deref());
 
         // String是智能指针，它实现了Deref trait，所以可以直接解引用
 
