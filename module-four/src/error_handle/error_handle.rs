@@ -60,7 +60,7 @@
     use std::io::prelude::*;
     use std::io::Error;
 
-    fn read_file_contents(file_path: &str) -> Result<String, Error> {
+    fn read_file_contents(file_path: &str) -> Result<String, std::io::Error> {
         let mut file = File::open(file_path)?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
@@ -100,7 +100,7 @@
 
     let result = factorial(10);
     println!("Result: {}", result);
-    if result < 10 {
+    if result < 1000 {
         panic!("Result too large!"); // 使用panic!恐慌
     }
 
@@ -109,6 +109,6 @@
 ```
 */
 
-pub fn boxs() {
+pub fn error_handle() {
     println!("");
 }

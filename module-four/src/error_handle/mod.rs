@@ -2,3 +2,4 @@
 //!
 
 pub mod error_handle;
+pub mod error_handle_example;

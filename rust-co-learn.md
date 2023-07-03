@@ -2535,7 +2535,7 @@ Box 可以将内存强制分配到堆上，并且它也是智能指针，可以�
 
 ## 4.1 错误处理
 
-Rust 整体的错误处理机制有一个层级，随着错误的`严重程度`可以选择不同的处理方案
+Rust 整体的错误处理机制有一个层级，随着错误的`严重程度`可以选择不同的处理方案（其实每一种错误都挺严重的）
 
 1. 类型系统保证函数契约（Rust 严格的类型系统已经帮我们消除了这部分的错误，如果类型不正确，是不会通过编译的）
 2. Option<T>消除空指针失败 (处理有值或者无值的情况)
@@ -2600,7 +2600,7 @@ Rust 整体的错误处理机制有一个层级，随着错误的`严重程度`�
     use std::io::prelude::*;
     use std::io::Error;
 
-    fn read_file_contents(file_path: &str) -> Result<String, Error> {
+    fn read_file_contents(file_path: &str) -> Result<String, std::io::Error> {
         let mut file = File::open(file_path)?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
@@ -2617,7 +2617,7 @@ Rust 整体的错误处理机制有一个层级，随着错误的`严重程度`�
     // 当你确定某个值一定会出现某种情况时，可以使用断言来终止程序
 
     fn extend_vec(v: &mut Vec<i32>, i: i32) {
-        assert!(v.len() == 5); // 断言
+        assert!(v.len() == 3); // 断言
         v.push(i)
     }
 
@@ -2640,11 +2640,53 @@ Rust 整体的错误处理机制有一个层级，随着错误的`严重程度`�
 
     let result = factorial(10);
     println!("Result: {}", result);
-    if result > 1000000 {
+    if result < 1000 {
         panic!("Result too large!"); // 使用panic!恐慌
     }
 
     // 总结：使用Option和Result来处理值或者错误，使用恐慌和断言来终止程序
+```
+
+一个使用第三方库自定义错误的小例子，使用thiserror，请先使用`cargo add thiserror` 安装依赖
+
+```
+// 扩展:使用第三方库thiserror来自定义错误
+
+    use std::io;
+    use thiserror::Error;
+
+   
+
+    #[derive(Error, Debug)]
+    pub enum DataStoreError {
+        #[error("data store disconnected")]
+        Disconnect(#[from] io::Error),
+        #[error("the data for key `{0}` is not available")]
+        Redaction(String),
+        #[error("invalid header (expected {expected:?}, found {found:?})")]
+        InvalidHeader { expected: String, found: String },
+        #[error("unknown data store error")]
+        Unknown,
+    }
+
+    fn read_data(key: &str) -> Result<(), DataStoreError> {
+        if key == "invalid_key" {
+            return Err(DataStoreError::Redaction(format!(
+                "The data for key `{}` is not available",
+                key
+            )));
+        }
+
+        // 读取数据的逻辑...
+
+        Ok(())
+    }
+
+    match read_data("valid_key") {
+        Ok(()) => println!("read success"),
+        Err(err) => println!("error: {:?}", err),
+    }
+
 ```
 
 ## 4.2 项目管理
