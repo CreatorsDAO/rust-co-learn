@@ -1,0 +1,2 @@
+[workspace]
+members = ["entry","lib1","lib2","lib3"]
