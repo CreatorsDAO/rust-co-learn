@@ -4,7 +4,6 @@
 /**
 
 ```
-
 use reqwest::{blocking::Client, Error};
 use serde::Deserialize;
 use std::vec::Vec;
@@ -44,6 +43,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let urls_clone = urls.clone();
 
     println!("同步请求：");
+
+    let sync_start = std::time::Instant::now();
     let sync_thread = std::thread::spawn(move || {
         for url in &urls_clone {
             match fetch_post_sync(url) {
@@ -53,8 +54,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     });
     sync_thread.join().unwrap();
+    let sync_duration = sync_start.elapsed().as_millis();
+    println!("同步请求总耗时：{} ms", sync_duration);
 
     println!("异步请求：");
+    let async_start = std::time::Instant::now();
     let mut tasks = Vec::new();
     for url in urls {
         let task = tokio::spawn(async move {
@@ -69,6 +73,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     for task in tasks {
         task.await?;
     }
+    let async_duration = async_start.elapsed().as_millis();
+    println!("异步请求总耗时：{} ms", async_duration);
+
+    let ratio = sync_duration as f64 / async_duration as f64;
+    println!("同步请求耗时是异步请求耗时的 {:.2} 倍", ratio);
 
     Ok(())
 }

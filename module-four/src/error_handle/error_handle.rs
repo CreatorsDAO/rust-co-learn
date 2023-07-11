@@ -58,7 +58,7 @@
 
     use std::fs::File;
     use std::io::prelude::*;
-    use std::io::Error;
+
 
     fn read_file_contents(file_path: &str) -> Result<String, std::io::Error> {
         let mut file = File::open(file_path)?;

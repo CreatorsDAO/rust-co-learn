@@ -5,6 +5,8 @@
 
 ```
 
+   // main函数是主线程
+fn main() {
     // 1 通过 channel 共享数据
 
     use std::sync::mpsc;
@@ -68,39 +70,39 @@
     }
     println!("Result: {}", *counter.lock().unwrap());
 
-
     // 3 使用原子类型共享数据
 
     use std::sync::atomic::{compiler_fence, AtomicBool};
 
-    // 使用原子类型创建一个锁，通过引用计数获得共享所有权
+    // 创建一个AtomicBool型的自旋锁，通过Arc包裹以在多线程之间共享
     let spin_lock = Arc::new(AtomicBool::new(false));
 
-    // 引用计数 +1
+    // 创建两个引用到同一个自旋锁的克隆
     let spin_lock_clone = Arc::clone(&spin_lock);
-
     let sc = Arc::clone(&spin_lock);
 
     let thread = thread::spawn(move || {
-
-        // 写操作，并指定内存顺序 release 语义：写屏障之前的读写操作不能重排在写屏障之后
+        // 用SeqCst内存顺序将锁状态设为true，表示该锁被占用。SeqCst可以确保此操作对所有线程立即可见，
+        // 即无论其他线程在何处，他们都能看到这个改变
         spin_lock_clone.store(true, std::sync::atomic::Ordering::SeqCst);
-
         println!("spin_lock status a {:?}", sc);
-        // 休眠
+
+        // 休眠2秒
         let time = std::time::Duration::from_secs(2);
         std::thread::sleep(time);
 
+        // 设置一个编译器栅栏，内存顺序是Release。这意味着这个栅栏之前的所有操作（包括上面的println!和sleep）都会在这个栅栏之前完成。
+        // Release语义：保证所有在此之前的操作都先执行完毕，确保在你更改共享数据之前，所有其他线程对这个数据的引用都已经完成
         compiler_fence(std::sync::atomic::Ordering::Release);
-        // 写操作， 并指定内存顺序 release 语义：写屏障之前的读写操作不能重排在写屏障之后
-        // 上面有一个写操作，并且下面的指令要求不能在此之后
+
+        // 使用SeqCst内存顺序将锁状态设为false，表示锁已经释放。SeqCst可以保证这个操作对所有线程立即可见
         spin_lock_clone.store(false, std::sync::atomic::Ordering::SeqCst);
         println!("spin_lock status b {:?}", sc);
     });
 
-    // 读操作 指定内存顺序 acquire 语义 读屏障之后的读写操作不能重排到读写屏障之前
-    // 上面的线程中有两条写指令，下面的指令要求之后的读写操作不能在此之前
-    while spin_lock.load(std::sync::atomic::Ordering::SeqCst) == false {
+    // 主线程在这里会持续检查自旋锁的状态，只要锁的值为true（被占用），就会等待。
+    // 这里也使用SeqCst内存顺序来保证锁状态的读取能在多线程中同步
+    while spin_lock.load(std::sync::atomic::Ordering::SeqCst) == true {
         println!("spin_lock status c {:?}", spin_lock)
     }
 
@@ -109,7 +111,7 @@
     if let Err(e) = thread.join() {
         println!("Thread had an error {:?}", e);
     }
-
+}
 
 ```
 */

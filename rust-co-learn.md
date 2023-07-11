@@ -2923,6 +2923,12 @@ fn main() {
 
     // 创建5个线程，它们和main函数的线程是并行的，并且执行结束的时间不一定
     for i in 0..5 {
+        // let x = move || {
+        //     println!("Hello from thread {}", i);
+        // };
+
+        // let handle = thread::spawn(x);
+
         let handle = thread::spawn(move || {
             println!("Hello from thread {}", i);
         });
@@ -2942,7 +2948,9 @@ fn main() {
 并发编程除了在原理理解上比较难之外，另一个难点是异步间共享数据。一般情况下，线程间共享数据主要有两种方式，共享内存和消息传递，其中共享内存还可以分为无锁共享和有锁共享。在 Rust 中，你可以通过通道（channel）在线程间发送数据，还可以通过锁来独占访问数据，也可以通过直接操作原子类型，实现无锁共享，下面是几个例子
 
 ```rust
-// 1 通过 channel 共享数据
+// main函数是主线程
+fn main() {
+    // 1 通过 channel 共享数据
 
     use std::sync::mpsc;
     use std::thread;
@@ -3005,39 +3013,39 @@ fn main() {
     }
     println!("Result: {}", *counter.lock().unwrap());
 
-
     // 3 使用原子类型共享数据
 
     use std::sync::atomic::{compiler_fence, AtomicBool};
 
-    // 使用原子类型创建一个锁，通过引用计数获得共享所有权
+    // 创建一个AtomicBool型的自旋锁，通过Arc包裹以在多线程之间共享
     let spin_lock = Arc::new(AtomicBool::new(false));
 
-    // 引用计数 +1
+    // 创建两个引用到同一个自旋锁的克隆
     let spin_lock_clone = Arc::clone(&spin_lock);
-
     let sc = Arc::clone(&spin_lock);
 
     let thread = thread::spawn(move || {
-
-        // 写操作，并指定内存顺序 release 语义：写屏障之前的读写操作不能重排在写屏障之后
+        // 用SeqCst内存顺序将锁状态设为true，表示该锁被占用。SeqCst可以确保此操作对所有线程立即可见，
+        // 即无论其他线程在何处，他们都能看到这个改变
         spin_lock_clone.store(true, std::sync::atomic::Ordering::SeqCst);
-
         println!("spin_lock status a {:?}", sc);
-        // 休眠
+
+        // 休眠2秒
         let time = std::time::Duration::from_secs(2);
         std::thread::sleep(time);
 
+        // 设置一个编译器栅栏，内存顺序是Release。这意味着这个栅栏之前的所有操作（包括上面的println!和sleep）都会在这个栅栏之前完成。
+        // Release语义：保证所有在此之前的操作都先执行完毕，确保在你更改共享数据之前，所有其他线程对这个数据的引用都已经完成
         compiler_fence(std::sync::atomic::Ordering::Release);
-        // 写操作， 并指定内存顺序 release 语义：写屏障之前的读写操作不能重排在写屏障之后
-        // 上面有一个写操作，并且下面的指令要求不能在此之后
+
+        // 使用SeqCst内存顺序将锁状态设为false，表示锁已经释放。SeqCst可以保证这个操作对所有线程立即可见
         spin_lock_clone.store(false, std::sync::atomic::Ordering::SeqCst);
         println!("spin_lock status b {:?}", sc);
     });
 
-    // 读操作 指定内存顺序 acquire 语义 读屏障之后的读写操作不能重排到读写屏障之前
-    // 上面的线程中有两条写指令，下面的指令要求之后的读写操作不能在此之前
-    while spin_lock.load(std::sync::atomic::Ordering::SeqCst) == false {
+    // 主线程在这里会持续检查自旋锁的状态，只要锁的值为true（被占用），就会等待。
+    // 这里也使用SeqCst内存顺序来保证锁状态的读取能在多线程中同步
+    while spin_lock.load(std::sync::atomic::Ordering::SeqCst) == true {
         println!("spin_lock status c {:?}", spin_lock)
     }
 
@@ -3046,6 +3054,7 @@ fn main() {
     if let Err(e) = thread.join() {
         println!("Thread had an error {:?}", e);
     }
+}
 ```
 
 ## 5.2 异步编程
@@ -3085,6 +3094,15 @@ Rust 中提供了一个 Future trait，并在 future 的基础上提供 async/aw
 ### 5.2.4 异步实战
 
 尽管 Rust 异步编程原理理解比较困难，但是在实际使用中它非常简单，下面是一个案例
+
+Cargo.toml
+
+```
+[dependencies]
+reqwest = { version = "0.11", features = ["blocking", "json"] }
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+```
 
 ```rust
 use reqwest::{blocking::Client, Error};
@@ -3126,6 +3144,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let urls_clone = urls.clone();
 
     println!("同步请求：");
+
+    let sync_start = std::time::Instant::now();
     let sync_thread = std::thread::spawn(move || {
         for url in &urls_clone {
             match fetch_post_sync(url) {
@@ -3135,8 +3155,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     });
     sync_thread.join().unwrap();
+    let sync_duration = sync_start.elapsed().as_millis();
+    println!("同步请求总耗时：{} ms", sync_duration);
 
     println!("异步请求：");
+    let async_start = std::time::Instant::now();
     let mut tasks = Vec::new();
     for url in urls {
         let task = tokio::spawn(async move {
@@ -3151,6 +3174,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     for task in tasks {
         task.await?;
     }
+    let async_duration = async_start.elapsed().as_millis();
+    println!("异步请求总耗时：{} ms", async_duration);
+
+    let ratio = sync_duration as f64 / async_duration as f64;
+    println!("同步请求耗时是异步请求耗时的 {:.2} 倍", ratio);
 
     Ok(())
 }
