@@ -1,3 +1,4 @@
+#![allow(warnings)]
 #![allow(non_snake_case)]
 #![allow(unused)]
 use std::process::exit;
