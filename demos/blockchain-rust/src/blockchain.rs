@@ -7,10 +7,10 @@ use crate::block::*;
 use crate::transaction::*;
 use bincode::{deserialize, serialize};
 use failure::format_err;
+use log::{debug, info};
 use serde_json::map::IterMut;
 use sled;
 use std::collections::HashMap;
-use log::{debug, info};
 
 // 这是当时《泰晤士报》的一条新闻标题，用来证明这个区块是在2009年1月3日之后创建的
 // 在比特币网络中，创世区块在2009年由中本聪(Satoshi)创建，并且从那时起就固定在比特币区块链的开始处.
@@ -21,14 +21,14 @@ const GENESIS_COINBASE_DATA: &str =
 #[derive(Debug)]
 pub struct Blockchain {
     // 字段前的 pub: 即使 Blockchain 已经声明 pub, 如果字段 tip/db  不声明, 也仍是默认私有的..
-    pub tip: String,  // 存放 lasthash 即最后一个区块的哈希, 
+    pub tip: String,  // 存放 lasthash 即最后一个区块的哈希,
     pub db: sled::Db, // 区块链 db 中的每一个区块都是通过其哈希来索引的，同时 db 上还有一个特殊的 key "LAST" 用来存储最后一个区块的哈希
 }
 
 /// BlockchainIterator is used to iterate over blockchain blocks   遍历区块链
 pub struct BlockchainIterator<'a> {
     current_hash: String,
-    bc: &'a Blockchain,  // bc 是指向 Blockchain 的引用, lifetime 标注告诉编译器: 引用的有效期至少和 'a 一样长
+    bc: &'a Blockchain, // bc 是指向 Blockchain 的引用, lifetime 标注告诉编译器: 引用的有效期至少和 'a 一样长
 }
 
 impl Blockchain {
@@ -41,12 +41,12 @@ impl Blockchain {
             Some(l) => l.to_vec(),
             None => Vec::new(),
         };
-        
+
         let lasthash = if hash.is_empty() {
-            info!("Create block database");  // no key "LAST"
+            info!("Create block database"); // no key "LAST"
             String::new()
         } else {
-            info!("Found block database"); 
+            info!("Found block database");
             String::from_utf8(hash.to_vec())?
         };
         Ok(Blockchain { tip: lasthash, db })
@@ -64,7 +64,7 @@ impl Blockchain {
         // GENESIS_COINBASE_DATA: 这是当时《泰晤士报》的一条新闻标题，用来证明这个区块是在2009年1月3日之后创建的
         // 在比特币网络中，创世区块在2009年由中本聪(Satoshi)创建，并且从那时起就固定在比特币区块链的开始处.
         let cbtx = Transaction::new_coinbase(address, String::from(GENESIS_COINBASE_DATA))?;
-        let genesis: Block = Block::new_genesis_block(cbtx);  //化身中本聪, 创建创始区块!
+        let genesis: Block = Block::new_genesis_block(cbtx); //化身中本聪, 创建创始区块!
         db.insert(genesis.get_hash(), serialize(&genesis)?)?;
         db.insert("LAST", genesis.get_hash().as_bytes())?;
         let bc = Blockchain {
@@ -80,7 +80,8 @@ impl Blockchain {
     pub fn mine_block(&mut self, transactions: Vec<Transaction>) -> Result<Block> {
         info!("mine a new block");
 
-        for tx in &transactions {  // 循环验证所有交易的有效性
+        for tx in &transactions {
+            // 循环验证所有交易的有效性
             if !self.verify_transacton(tx)? {
                 return Err(format_err!("ERROR: Invalid transaction"));
             }
@@ -118,7 +119,8 @@ impl Blockchain {
         let mut spend_txos: HashMap<String, Vec<i32>> = HashMap::new(); // 存储了所有已经花费的输出
 
         // 迭代 整个区块链 db 的每个区块 & 每个区块中的每个交易
-        for block in self.iter() {  // Blockchain 没实现 Iterator, 但是其 iter() 方法返回了 BlockchainIterator
+        for block in self.iter() {
+            // Blockchain 没实现 Iterator, 但是其 iter() 方法返回了 BlockchainIterator
             for tx in block.get_transaction() {
                 // 对于交易的每个输出，我们检查它是否在 spend_txos 中，如果在，则表示这个输出已经被花费，
                 // 我们跳过这个输出。否则，我们将这个输出添加到 utxos 中。
@@ -275,13 +277,12 @@ impl<'a> Iterator for BlockchainIterator<'a> {
 use super::*;
 
 #[test]
-fn test_add_block(){
-
+fn test_add_block() {
     let mut b = Blockchain::new().unwrap();
     // b.add_block("data1".to_string());
     // b.add_block("data2".to_string());
     // b.add_block("data3".to_string());
-    
+
     // for item in b.iter(){
     //     println!("item: {:?}", item);
     // }

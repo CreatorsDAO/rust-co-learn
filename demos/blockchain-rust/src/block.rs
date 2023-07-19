@@ -21,9 +21,10 @@ pub struct Block {
     timestamp: u128,
     transactions: Vec<Transaction>,
     prev_block_hash: String,
-    hash: String,  // hash Merkle Root
-    nonce: i32,
+    hash: String,  // 区块哈希值可以唯一、明确地标识一个区块，并且任何节点哈希计算都可以独立地获取该区块哈希值。
+    nonce: i32,  // A counter used for the proof-of-work algorithm
     height: i32,
+    // Why no Merkle Root hash ?
 }
 
 impl Block {
@@ -115,7 +116,7 @@ impl Block {
     /// Validate validates block's PoW
     /// 本 Block 的 nonce 不断变化, 不断调用该函数验证该 nonce 是否能让区块的哈希值满足某种条件 (hash 完后 TARGET_HEXS 位为 0)
     fn validate(&self) -> Result<bool> {
-        let data = self.prepare_hash_data()?; // 将上一个区块的 hash, nonce.. 等结构化数据拿来做哈希, 为了放在下一个区块里面
+        let data = self.prepare_hash_data()?; // hash(Block) 
         let mut hasher = Sha256::new();
         hasher.input(&data[..]);
         let mut vec1: Vec<u8> = Vec::new();

@@ -1,3 +1,4 @@
+#![allow(warnings)]
 use crate::cli::Cli;
 use crate::errors::Result;
 
