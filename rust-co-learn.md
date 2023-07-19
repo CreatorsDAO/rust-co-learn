@@ -3375,7 +3375,7 @@ Rust 的设计初衷是提供内存安全性和线程安全性，因此其编译
 1. 解引用裸指针
 
 ```rust
-rustCopy code
+
 fn main() {
     let x = 10;
     let y = &x as *const i32;
@@ -3391,7 +3391,7 @@ fn main() {
 2. 调用不安全的函数或方法：
 
 ```rust
-rustCopy code
+
 unsafe fn unsafe_function() {
     // 执行不安全的操作，如直接操作内存或调用底层系统 API
 }
@@ -3406,7 +3406,7 @@ fn main() {
 3. 访问或修改可变静态变量：
 
 ```rust
-rustCopy code
+
 static mut COUNTER: i32 = 0;
 
 fn increment_counter() {
@@ -3426,21 +3426,24 @@ fn main() {
 4. 实现不安全的 trait：
 
 ```rust
-rustCopy code
+
 unsafe trait UnsafeTrait {
-    fn unsafe_method(&self);
+    unsafe fn unsafe_method(&self);
 }
 
-struct MyStruct;
+struct MyStruct {
+    value: i32,
+}
 
 unsafe impl UnsafeTrait for MyStruct {
-    fn unsafe_method(&self) {
-        // 执行不安全的操作
+    unsafe fn unsafe_method(&self) {
+        let mut raw_ptr = self as *const Self as *mut Self;
+        (*raw_ptr).value = 42;
     }
 }
 
 fn main() {
-    let my_struct = MyStruct;
+    let my_struct = MyStruct { value: 10 };
 
     unsafe {
         my_struct.unsafe_method();

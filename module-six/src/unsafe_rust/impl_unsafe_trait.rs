@@ -6,25 +6,27 @@
 ```
 
 unsafe trait UnsafeTrait {
-    fn unsafe_method(&self);
+    unsafe fn unsafe_method(&self);
 }
 
-struct MyStruct;
+struct MyStruct {
+    value: i32,
+}
 
 unsafe impl UnsafeTrait for MyStruct {
-    fn unsafe_method(&self) {
-        // 执行不安全的操作
+    unsafe fn unsafe_method(&self) {
+        let mut raw_ptr = self as *const Self as *mut Self;
+        (*raw_ptr).value = 42;
     }
 }
 
 fn main() {
-    let my_struct = MyStruct;
+    let my_struct = MyStruct { value: 10 };
 
     unsafe {
         my_struct.unsafe_method();
     }
 }
-
 
 ```
 */
